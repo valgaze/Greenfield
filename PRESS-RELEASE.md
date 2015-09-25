@@ -17,28 +17,28 @@ Once the project moves into development, the press release can be used as a touc
  -->
  
 ## Heading ##
-  > Name the product in a way the reader (i.e. your target customers) will understand.
+  > Greenfield Game
 
 ## Sub-Heading ##
-  > Describe who the market for the product is and what benefit they get. One sentence only underneath the title.
+  > A multiplayer game you can play on with friends from your phone!
 
 ## Summary ##
-  > Give a summary of the product and the benefit. Assume the reader will not read anything else so make this paragraph good.
+  > Greenfield Game is a multiplayer game that is designed to be played on a single large browser window. Users can connect to the same game instance from their mobile devices, which they will use as controllers for the game. The game is flexible and rounds cycle quickly, so that new players never have to wait too long to jump in.
 
 ## Problem ##
-  > Describe the problem your product solves.
+  > Local multiplayer gaming normally requires a console, controllers, and other hardware. This is inconvenient and not portable. Playing games at a party with your friends often requires excessive setup that detracts from the gaming experience.
 
 ## Solution ##
-  > Describe how your product elegantly solves the problem.
+  > Greenfield game brings the "couch gaming with your buddies" experience anywhere by allowing users to run the game on any device with a web browser and control it from their mobile devices.
 
 ## Quote from You ##
-  > A quote from a spokesperson in your company.
+  > "We've built the world's most portable party game."
 
 ## How to Get Started ##
-  > Describe how easy it is to get started.
+  > Open [this page](http://www.hr32.elasticbeanstalk.com) on a big screen, then open a [controller](http://www.hr32.elasticbeanstalk.com/controller) on your phone and have all your friends jump in!
 
 ## Customer Quote ##
-  > Provide a quote from a hypothetical customer that describes how they experienced the benefit.
+  > "This is literally the greatest thing to ever happen to mankind." -Bill Gates
 
 ## Closing and Call to Action ##
-  > Wrap it up and give pointers where the reader should go next.
+  > If you are interested in the development process, check out our Githiub...
