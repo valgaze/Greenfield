@@ -103,11 +103,16 @@ function onNewPlayer() {
 
   if (globals.currentPlayers.length < 4){
     globals.currentPlayers.push(this.id);
-    this.broadcast.emit("new player", {id: this.id});
+    var playerNumber = exports.helpers.findArrayIndex(this.id, globals.currentPlayers) + 1;
+    this.broadcast.emit("new player", {id: this.id, playerNumber: playerNumber});
+
+    io.to(this.id).emit('confirmPlayer', {id: this.id, playerNumber: playerNumber, message: "You are player " + playerNumber});
+
     console.log("added you in!");
     console.log("all the players", globals.currentPlayers);
   }else{
-    this.broadcast.emit("reject player", {id: this.id});
+    io.to(this.id).emit('rejectPlayer', {id: this.id, playerNumber: false, message: "Sorry, too many players"});
+
     console.log("Sorry fella all full!");
     console.log("all the players", globals.currentPlayers);
   }
