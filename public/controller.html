@@ -16,6 +16,7 @@
     var right=false;
     var up = false;
     var jump=false;
+    var shoot=false;
     
     var mainState = {
       preload: function () {
@@ -57,6 +58,10 @@
             buttonright.events.onInputDown.add(function(){right=true;});
             buttonright.events.onInputUp.add(function(){right=false;});
 
+        buttonA = game.add.button(0, 100, 'buttonhorizontal', null, this, 0, 1, 0, 1);
+            buttonA.events.onInputDown.add(function(){shoot=true;});
+            buttonA.events.onInputUp.add(function(){shoot=false;});
+
 
       },
       update: function () {
@@ -70,7 +75,10 @@
         if (up) {
          socket.emit('up button', {});
         }
-        if (game.input.currentPointers == 0 && !game.input.activePointer.isMouse){right=false; left=false; jump=false;
+        if (shoot) {
+         socket.emit('shoot button', {});
+        }
+        if (game.input.currentPointers == 0 && !game.input.activePointer.isMouse){right=false; left=false; jump=false; shoot=false;
         } //this works around a "bug" where a button gets stuck in pressed state
 
       },

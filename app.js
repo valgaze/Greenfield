@@ -44,7 +44,7 @@ io.on('connection', function(socket){
 
   socket.on("up button", upButton);
 
-  socket.on("down button", downButton);
+  socket.on("shoot button", shootButton);
 
   socket.on("right button", rightButton);
 
@@ -85,9 +85,9 @@ function upButton(){
 
 }
 
-function downButton(){
-  console.log("A DOWN BUTTON WAS PRESSED!!");
-  this.broadcast.emit("down button", {id:this.id});
+function shootButton(){
+  console.log("A SHOOT BUTTON WAS PRESSED!!");
+  this.broadcast.emit("shoot button", {id:this.id});
 
 }
 

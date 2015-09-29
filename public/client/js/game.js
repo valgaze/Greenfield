@@ -2,9 +2,12 @@ var game = new Phaser.Game(800, 600, Phaser.AUTO, 'gameContainer');
 
 var socket = io();
 
+var alive = [];
+var dead = [];
+
 var projectiles;
-var nextFire = 0;
-var fireRate = 100;
+// var nextFire = 0;
+// var fireRate = 100;
 // var shotsFired = false;
 var mainState = {
   preload: function () {
@@ -104,7 +107,6 @@ var mainState = {
      });
     
     socket.on("up button", function(data){
-          // that.player.body.velocity.y = -600;
           for (var i = 0; i < players.children.length; i++){
               if (players.children[i].theId === data.id){
                   players.children[i].body.velocity.y = -600;
@@ -116,7 +118,7 @@ var mainState = {
             }
      });
 
-    socket.on("down button", function(data){
+    socket.on("shoot button", function(data){
       for (var i = 0; i < players.children.length; i++){
         if (players.children[i].theId === data.id){
             players.children[i].fire_now();
@@ -138,20 +140,25 @@ var mainState = {
         player.body.bounce.y = 0.5;
         player.body.collideWorldBounds = true;
         player.facing = 1;
+        player.fireRate = 500;
+        player.nextFire = 0;
+        player.health = 5;
         player.fire_now = function(){
-          if (game.time.now > nextFire){
-            nextFire = game.time.now + fireRate;
+          if (game.time.now > player.nextFire){
+            player.nextFire = game.time.now + player.fireRate;
             var projectile = projectiles.getFirstExists(false); // get the first created fireball that no exists atm
             if (projectile){
+              projectile.owner = player.theId;
               projectile.exists = true;  // come to existance !
               projectile.lifespan=2500;  // remove the fireball after 2500 milliseconds - back to non-existance
-              projectile.reset(player.x + 20 * player.facing, player.y);
+              projectile.reset(player.x + 50 * player.facing, player.y);
               game.physics.arcade.enable(projectile);
               projectile.body.velocity.x = 1000 * player.facing;
             }
           }
         }
-        console.log("group", players)
+        alive.push(player.theId);
+        //console.log("group", players)
       
      });
 
@@ -167,6 +174,17 @@ var mainState = {
 
   update: function () {
 
+    game.physics.arcade.collide(players);
+    //game.physics.arcade.collide(players,projectiles);
+
+    game.physics.arcade.overlap(players, projectiles, function(player,projectile) {
+      projectile.kill();
+      player.health--;
+      console.log('Someone got shot and now they have ' + player.health + ' health left.')
+    }, null, this);
+
+
+
     //Check for collisions between any players and the ground.
     
     for (var i = 0; i < this.ground.length; i++) {
@@ -175,6 +193,19 @@ var mainState = {
         game.physics.arcade.collide(players.children[j], this.ground[i]);
         players.children[j].body.velocity.x = 0;
       }
+    }
+
+    for (var i = 0; i< players.children.length; i++){
+      if (players.children[i].health <= 0){
+
+        dead.push(alive.splice(alive.indexOf(players.children[i].theId),1));
+        players.children[i].kill();
+
+      }
+    }
+
+    if (alive.length === 1){
+      console.log('Player ' + players.children[0].theId + ' won the game.');
     }
 
     
@@ -191,8 +222,7 @@ be run in the phaser update loop rather than on socket emit events.
     var cursors = game.input.keyboard.createCursorKeys();
     if (cursors.left.isDown)
     { 
-      console.log("shoot button pressed");
-      this.fire_now();
+      players.scale = (2,2);
       // shotsFired = true;
 
     }
