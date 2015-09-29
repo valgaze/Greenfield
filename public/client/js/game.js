@@ -2,19 +2,26 @@ var game = new Phaser.Game(800, 600, Phaser.AUTO, 'gameContainer');
 
 var socket = io();
 
-
+var projectiles;
+var nextFire = 0;
+var fireRate = 100;
+// var shotsFired = false;
 var mainState = {
   preload: function () {
     game.stage.backgroundColor = '#666';
     game.load.image('player', 'assets/player.png'); 
     game.load.image('ground', 'assets/ground.png');
+    game.load.image('projectile', 'assets/wall.png')
     game.stage.disableVisibilityChange = true;
   },
   create: function () {
+
+    
+
     game.physics.startSystem(Phaser.Physics.ARCADE);
-    pineapples = game.add.group();
-    pineapples.enableBody = true;
-    //game.physics.enable(pineapples, Phaser.Physics.ARCADE);
+    players = game.add.group();
+    players.enableBody = true;
+    //game.physics.enable(players, Phaser.Physics.ARCADE);
 
     //Player ceation handled below
     // this.player = this.game.add.sprite(100, 245, 'player');
@@ -24,6 +31,7 @@ var mainState = {
     // this.player.body.collideWorldBounds = true;
     
 
+
     this.platforms = game.add.group();
     this.platforms.enableBody = true;
     
@@ -32,6 +40,19 @@ var mainState = {
       for (var i = 0; i < game.world.width; i+=70) {
         this.ground.push(this.platforms.create(i, game.world.height - 70, 'ground'));
       }
+
+      for (var i = game.world.width/4; i < game.world.width * (3/4); i+=70) {
+        this.ground.push(this.platforms.create(i, game.world.height/2, 'ground'));
+      }
+
+      for (var i = 0; i < game.world.width * (1/4); i+=70) {
+        this.ground.push(this.platforms.create(i, game.world.height/4 -70, 'ground'));
+      }
+
+      for (var i = game.world.width * (3/4); i < game.world.width; i+=70) {
+        this.ground.push(this.platforms.create(i, game.world.height/4 - 70, 'ground'));
+      }
+
       for (var j = 0; j < this.ground.length; j++) {
         this.ground[j].body.immovable = true;
       }
@@ -42,12 +63,12 @@ var mainState = {
     socket.on("remove player", function(data){
 
           // that.player.body.velocity.x = -200;
-          for (var i = 0; i < pineapples.children.length; i++){
-              if (pineapples.children[i].theId === data.id){
-                  pineapples.children[i].destroy();
+          for (var i = 0; i < players.children.length; i++){
+              if (players.children[i].theId === data.id){
+                  players.children[i].destroy();
               }else{
-                console.log(pineapples.children[i], i);
-                console.log("instanceid:", pineapples.children[i].theId);
+                console.log(players.children[i], i);
+                console.log("instanceid:", players.children[i].theId);
                 console.log("targetid", data.id);
               }
             }
@@ -55,12 +76,13 @@ var mainState = {
     socket.on("left button", function(data){
 
           // that.player.body.velocity.x = -200;
-          for (var i = 0; i < pineapples.children.length; i++){
-              if (pineapples.children[i].theId === data.id){
-                  pineapples.children[i].body.velocity.x = -200;
+          for (var i = 0; i < players.children.length; i++){
+              if (players.children[i].theId === data.id){
+                  players.children[i].body.velocity.x = -200;
+                  players.children[i].facing = -1;
               }else{
-                console.log(pineapples.children[i], i);
-                console.log("instanceid:", pineapples.children[i].theId);
+                console.log(players.children[i], i);
+                console.log("instanceid:", players.children[i].theId);
                 console.log("targetid", data.id);
               }
             }
@@ -68,12 +90,14 @@ var mainState = {
 
     socket.on("right button", function(data){
          // that.player.body.velocity.x = 200;
-        for (var i = 0; i < pineapples.children.length; i++){
-            if (pineapples.children[i].theId === data.id){
-                pineapples.children[i].body.velocity.x = 200;
+        for (var i = 0; i < players.children.length; i++){
+            if (players.children[i].theId === data.id){
+                players.children[i].body.velocity.x = 200;
+                players.children[i].facing = 1;
+
             }else{
-              console.log(pineapples.children[i], i);
-              console.log("instanceid:", pineapples.children[i].theId);
+              console.log(players.children[i], i);
+              console.log("instanceid:", players.children[i].theId);
               console.log("targetid", data.id);
             }
           }
@@ -81,48 +105,79 @@ var mainState = {
     
     socket.on("up button", function(data){
           // that.player.body.velocity.y = -600;
-          for (var i = 0; i < pineapples.children.length; i++){
-              if (pineapples.children[i].theId === data.id){
-                  pineapples.children[i].body.velocity.y = -600;
+          for (var i = 0; i < players.children.length; i++){
+              if (players.children[i].theId === data.id){
+                  players.children[i].body.velocity.y = -600;
               }else{
-                console.log(pineapples.children[i], i);
-                console.log("instanceid:", pineapples.children[i].theId);
+                console.log(players.children[i], i);
+                console.log("instanceid:", players.children[i].theId);
                 console.log("targetid", data.id);
               }
             }
      });
 
     socket.on("down button", function(data){
-          // console.log(data.payload)
-          that.player.body.velocity.y = -600;
-
-     });
+      for (var i = 0; i < players.children.length; i++){
+        if (players.children[i].theId === data.id){
+            players.children[i].fire_now();
+        }else{
+          console.log(players.children[i], i);
+          console.log("instanceid:", players.children[i].theId);
+          console.log("targetid", data.id);
+        }
+      }
+    });
 
     socket.on("new player", function(data){
         //players.create(360 + Math.random() * 200, 120 + Math.random() * 200, 'player');
         console.log("from server", data.id);
-        var pineapple = pineapples.create(200,50, 'player');
-        pineapple.theId = data.id;
-        game.physics.arcade.enable(pineapple);
-        pineapple.body.gravity.y = 1000; 
-        pineapple.body.bounce.y = 0.5;
-        pineapple.body.collideWorldBounds = true;
-        console.log("group", pineapples)
+        var player = players.create(200,50, 'player');
+        player.theId = data.id;
+        game.physics.arcade.enable(player);
+        player.body.gravity.y = 1000; 
+        player.body.bounce.y = 0.5;
+        player.body.collideWorldBounds = true;
+        player.facing = 1;
+        player.fire_now = function(){
+          if (game.time.now > nextFire){
+            nextFire = game.time.now + fireRate;
+            var projectile = projectiles.getFirstExists(false); // get the first created fireball that no exists atm
+            if (projectile){
+              projectile.exists = true;  // come to existance !
+              projectile.lifespan=2500;  // remove the fireball after 2500 milliseconds - back to non-existance
+              projectile.reset(player.x + 20 * player.facing, player.y);
+              game.physics.arcade.enable(projectile);
+              projectile.body.velocity.x = 1000 * player.facing;
+            }
+          }
+        }
+        console.log("group", players)
       
      });
+
+
+    projectiles = game.add.group();  // add a new group for fireballs
+    projectiles.createMultiple(500, 'projectile', 0, false);
+
+
+
+
   },
+
+
   update: function () {
 
     //Check for collisions between any players and the ground.
     
     for (var i = 0; i < this.ground.length; i++) {
       //game.physics.arcade.collide(this.player, this.ground[i]);
-      for (var j = 0; j < pineapples.children.length; j++){
-        game.physics.arcade.collide(pineapples.children[j], this.ground[i]);
-        pineapples.children[j].body.velocity.x = 0;
+      for (var j = 0; j < players.children.length; j++){
+        game.physics.arcade.collide(players.children[j], this.ground[i]);
+        players.children[j].body.velocity.x = 0;
       }
     }
 
+    
 
 /*******************
 Code below handles non-socket inputs. Consider changing input format
@@ -133,13 +188,21 @@ be run in the phaser update loop rather than on socket emit events.
 
   //   this.player.body.velocity.x = 0;
 
-  //   var cursors = game.input.keyboard.createCursorKeys();
-  //   if (cursors.left.isDown)
-  //   { 
-  //       socket.emit("left button", {somedata:"some value"});
-  //       this.player.body.velocity.x = -150;
+    var cursors = game.input.keyboard.createCursorKeys();
+    if (cursors.left.isDown)
+    { 
+      console.log("shoot button pressed");
+      this.fire_now();
+      // shotsFired = true;
 
-  //   }
+    }
+
+    // cursors.left.isUp
+    // { 
+    //   console.log("shoot button released");
+    //     shotsFired = false;
+
+    // }
   //   else if (cursors.right.isDown)
   //   {
   //       this.player.body.velocity.x = 150;
@@ -152,8 +215,24 @@ be run in the phaser update loop rather than on socket emit events.
 
   //       this.player.body.velocity.y = -600;
   //   }
-  }
+  },
+  // fire_now: function(){
+  //   if (game.time.now > nextFire){
+  //     nextFire = game.time.now + fireRate;
+  //     var projectile = projectiles.getFirstExists(false); // get the first created fireball that no exists atm
+  //     if (projectile){
+  //       projectile.exists = true;  // come to existance !
+  //       projectile.lifespan=2500;  // remove the fireball after 2500 milliseconds - back to non-existance
+  //       projectile.reset(players.children[0].x + 20 * players.children[0].facing, players.children[0].y);
+  //       game.physics.arcade.enable(projectile);
+  //       projectile.body.velocity.x = 1000 * players.children[0].facing;
+  //     }
+  //   }
+  // }
 };
+
+
+
 
 game.state.add('main', mainState);
 game.state.start('main');
