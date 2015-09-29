@@ -4,8 +4,10 @@ var socket = io();
 
 var alive = [];
 var dead = [];
+
 var someoneKilled = false;
 var winnerAnnounced = false;
+
 var projectiles;
 
 // var nextFire = 0;
@@ -149,10 +151,9 @@ var mainState = {
             }
           }
 
-        }
+        };
         alive.push(player.theId);
         //console.log("group", players)
-      
      });
 
 
@@ -191,6 +192,7 @@ var mainState = {
 
     for (var i = 0; i< players.children.length; i++){
       if (players.children[i].health <= 0){
+
         if (dead.indexOf(players.children[i].theId)===-1){
           //console.log(alive.splice(alive.indexOf(players.children[i].theId),1));
           var justDead = alive.splice(alive.indexOf(players.children[i].theId),1);
@@ -214,6 +216,7 @@ var mainState = {
     }
 
 
+
     
 
 /*******************
@@ -230,7 +233,6 @@ be run in the phaser update loop rather than on socket emit events.
     { 
       players.scale = (2,2);
       // shotsFired = true;
-
 
     }
 
