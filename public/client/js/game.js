@@ -4,7 +4,8 @@ var socket = io();
 
 var alive = [];
 var dead = [];
-
+var someoneKilled = false;
+var winnerAnnounced = false;
 var projectiles;
 
 // var nextFire = 0;
@@ -188,15 +189,26 @@ var mainState = {
 
     for (var i = 0; i< players.children.length; i++){
       if (players.children[i].health <= 0){
-
-        dead.push(alive.splice(alive.indexOf(players.children[i].theId),1));
+        if (dead.indexOf(players.children[i].theId)===-1){
+          //console.log(alive.splice(alive.indexOf(players.children[i].theId),1));
+          var justDead = alive.splice(alive.indexOf(players.children[i].theId),1);
+          console.log(justDead[0]);
+          dead.push(justDead[0]);
+          someoneKilled = true;
+        }
         players.children[i].kill();
-
       }
     }
 
-    if (alive.length === 1){
-      console.log('Player ' + players.children[0].theId + ' won the game.');
+    if (someoneKilled){
+      console.log("Player " + dead[dead.length-1] + " has died.");
+      someoneKilled = false;
+      socket.emit("player killed", {id: dead[dead.length-1]});
+    }
+
+    if (alive.length === 1 && dead.length !== 0 && !winnerAnnounced){
+      console.log('Player ' + alive[0] + ' won the game.');
+      winnerAnnounced = true;
     }
 
     

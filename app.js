@@ -60,6 +60,8 @@ io.on('connection', function(socket){
 
   socket.on("right button", rightButton);
 
+  socket.on("player killed", function(data){console.log("player "+(data.id)+" was killed")});
+
 });
 
 app.set('port', process.env.PORT || 3000);
