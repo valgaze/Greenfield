@@ -43,6 +43,13 @@
       create: function () {
 
         socket.emit('new player', {});
+        socket.on("confirmPlayer", function(data){
+            alert(data.message)
+        });
+
+        socket.on("rejectPlayer", function(data){
+            alert(data.message)
+        });
 
         buttonleft = game.add.button(0, 0, 'buttonhorizontal', null, this, 0, 1, 0, 1);
             buttonleft.events.onInputDown.add(function(){left=true;});
@@ -83,6 +90,8 @@
       }
 
     };
+
+
 
     game.state.add('main', mainState);
     game.state.start('main');

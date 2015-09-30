@@ -4,6 +4,16 @@ var server = require('http').Server(app);
 var io = require('socket.io')(server);
 var path = require('path');
 
+exports.helpers = {
+  findArrayIndex : function(item, array){
+    return array.indexOf(item);
+  },
+  removeFromArray : function(index, array){
+    return array.splice(index, 1);
+  }
+};
+
+
 /*****************************
   ROUTING
 *****************************/
@@ -27,6 +37,8 @@ app.use('/js', express.static(path.join(__dirname, 'public/client/js')));
 app.use('/lib', express.static(path.join(__dirname, 'public/client/lib')));
 
 
+var globals = {};
+globals.currentPlayers = [];
 
 /*****************************
   SOCKET LISTENERS
@@ -65,32 +77,20 @@ server.listen(app.get("port"), function(){
   //They distribute button press events to all connected clients.
 
 function rightButton(){
-  console.log("A RIGHT BUTTON WAS PRESSED!!");
-
-  // Broadcast right button to connected socket clients
-  // with socket id of the client who sent the 
-  // right button event.
-
   this.broadcast.emit("right button", {id:this.id});
 }
 
 function leftButton(){
-  console.log("A LEFT BUTTON WAS PRESSED!!");
   this.broadcast.emit("left button", {id:this.id});
 }
 
 function upButton(){
-  console.log("A LEFT BUTTON WAS PRESSED!!");
   this.broadcast.emit("up button", {id:this.id});
-
 }
 
 function downButton(){
-  console.log("A DOWN BUTTON WAS PRESSED!!");
   this.broadcast.emit("down button", {id:this.id});
-
 }
-
 
 
 /*****************************
@@ -100,11 +100,36 @@ function downButton(){
 // Emits "new player" event to all connected clients.
 // Event payload is the id of the socket that created the new player.
 function onNewPlayer() {
-  this.broadcast.emit("new player", {id: this.id});
+
+  if (globals.currentPlayers.length < 4){
+    globals.currentPlayers.push(this.id);
+    var playerNumber = exports.helpers.findArrayIndex(this.id, globals.currentPlayers) + 1;
+    this.broadcast.emit("new player", {id: this.id, playerNumber: playerNumber});
+
+    io.to(this.id).emit('confirmPlayer', {id: this.id, playerNumber: playerNumber, message: "You are player " + playerNumber});
+
+    console.log("added you in!");
+    console.log("all the players", globals.currentPlayers);
+  }else{
+    io.to(this.id).emit('rejectPlayer', {id: this.id, playerNumber: false, message: "Sorry, too many players"});
+
+    console.log("Sorry fella all full!");
+    console.log("all the players", globals.currentPlayers);
+  }
 };
 
 // Emits "remove player" event to all connected clients.
 // Event payload is the id of the socket that created the new player.
 function onClientDisconnect() {
-  this.broadcast.emit("remove player", {id: this.id});
+  console.log('this client left', this.id);
+  console.log('Before dong anything, the array looks like this:', globals.currentPlayers);
+  var id = this.id;
+
+  var index = exports.helpers.findArrayIndex(id, globals.currentPlayers);
+  if (index > -1){
+    exports.helpers.removeFromArray(index, globals.currentPlayers);
+    this.broadcast.emit("remove player", {id: this.id});
+    console.log('player removed, now array looks like this:', globals.currentPlayers);    
+  }
+
 };
