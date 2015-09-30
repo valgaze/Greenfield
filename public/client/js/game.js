@@ -7,6 +7,8 @@ var dead = [];
 var someoneKilled = false;
 var winnerAnnounced = false;
 var projectiles;
+var playerSpots = {};
+
 
 // var nextFire = 0;
 // var fireRate = 100;
@@ -20,8 +22,16 @@ var mainState = {
     game.load.image('projectile', 'assets/wall.png');
     game.load.image('gameover', 'assets/gameover.png');
     game.stage.disableVisibilityChange = true;
+
   },
   create: function () {
+
+    playerSpots = {
+      1:{x:60,y:1},
+      2:{x:game.world.width-100, y:1},
+      3:{x:60,y:game.world.height-200},
+      4:{x:game.world.width-100,y:game.world.height-200}
+    };
 
     socket.emit("game start");
 
@@ -127,8 +137,9 @@ var mainState = {
     });
 
     socket.on("new player", function(data){
-        console.log("from server", data.id);
-        var player = players.create(200,50, 'player');
+        console.log("from server", data.id, "player number is ",data.playerNumber);
+        var playerNumber = data.playerNumber;
+        var player = players.create(playerSpots[playerNumber].x, playerSpots[playerNumber].y, 'player');
         player.theId = data.id;
         game.physics.arcade.enable(player);
         player.body.gravity.y = 1000;
