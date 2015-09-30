@@ -23,6 +23,9 @@ var mainState = {
   },
   create: function () {
 
+    socket.emit("game start");
+
+    console.log('create function called');
     
 
     game.physics.startSystem(Phaser.Physics.ARCADE);

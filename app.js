@@ -52,6 +52,8 @@ io.on('connection', function(socket){
 
   socket.on("new player", onNewPlayer);  
 
+  socket.on("game start", onGameStart);
+
   socket.on("left button", leftButton);
 
   socket.on("up button", upButton);
@@ -107,7 +109,7 @@ function onNewPlayer() {
   if (globals.currentPlayers.length < 4){
     globals.currentPlayers.push(this.id);
     var playerNumber = exports.helpers.findArrayIndex(this.id, globals.currentPlayers) + 1;
-    this.broadcast.emit("new player", {id: this.id, playerNumber: playerNumber});
+    //this.broadcast.emit("new player", {id: this.id, playerNumber: playerNumber});
 
     io.to(this.id).emit('confirmPlayer', {id: this.id, playerNumber: playerNumber, message: "You are player " + playerNumber});
 
@@ -119,6 +121,26 @@ function onNewPlayer() {
     console.log("Sorry fella all full!");
     console.log("all the players", globals.currentPlayers);
   }
+};
+
+function onGameStart() {
+
+  for (var i = 0; i < globals.currentPlayers.length; i++){
+    //globals.currentPlayers.push(this.id);
+    // var playerNumber = exports.helpers.findArrayIndex(this.id, globals.currentPlayers) + 1;
+    this.emit("new player", {id: globals.currentPlayers[i],playerNumber: i+1});
+
+    // io.to(this.id).emit('confirmPlayer', {id: this.id, playerNumber: playerNumber, message: "You are player " + playerNumber});
+
+    // console.log("added you in!");
+    // console.log("all the players", globals.currentPlayers);
+  }
+   // else{
+  //   io.to(this.id).emit('rejectPlayer', {id: this.id, playerNumber: false, message: "Sorry, too many players"});
+
+  //   console.log("Sorry fella all full!");
+  //   console.log("all the players", globals.currentPlayers);
+  // }
 };
 
 // Emits "remove player" event to all connected clients.
