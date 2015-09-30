@@ -153,18 +153,23 @@ var mainState = {
         alive.push(player.theId);
         //console.log("group", players)
      });
-
-
     projectiles = game.add.group();  // add a new group for fireballs
     projectiles.createMultiple(500, 'projectile', 0, false);
-
-
-
-
   },
 
 
   update: function () {
+
+    game.physics.arcade.collide(players);
+    //game.physics.arcade.collide(players,projectiles);
+
+    game.physics.arcade.overlap(players, projectiles, function(player,projectile) {
+      projectile.kill();
+      player.health--;
+      console.log('Someone got shot and now they have ' + player.health + ' health left.')
+    }, null, this);
+
+
 
     game.physics.arcade.collide(players);
     //game.physics.arcade.collide(players,projectiles);
@@ -187,6 +192,29 @@ var mainState = {
       }
     }
 
+    for (var i = 0; i< players.children.length; i++){
+      if (players.children[i].health <= 0){
+        if (dead.indexOf(players.children[i].theId)===-1){
+          //console.log(alive.splice(alive.indexOf(players.children[i].theId),1));
+          var justDead = alive.splice(alive.indexOf(players.children[i].theId),1);
+          console.log(justDead[0]);
+          dead.push(justDead[0]);
+          someoneKilled = true;
+        }
+        players.children[i].kill();
+      }
+    }
+
+    if (someoneKilled){
+      console.log("Player " + dead[dead.length-1] + " has died.");
+      someoneKilled = false;
+      socket.emit("player killed", {id: dead[dead.length-1]});
+    }
+
+    if (alive.length === 1 && dead.length !== 0 && !winnerAnnounced){
+      console.log('Player ' + alive[0] + ' won the game.');
+      winnerAnnounced = true;
+    }
 
     for (var i = 0; i< players.children.length; i++){
       if (players.children[i].health <= 0){
@@ -225,12 +253,10 @@ be run in the phaser update loop rather than on socket emit events.
 
 
     var cursors = game.input.keyboard.createCursorKeys();
-
     if (cursors.left.isDown)
     { 
       players.scale = (2,2);
       // shotsFired = true;
-
     }
 
     

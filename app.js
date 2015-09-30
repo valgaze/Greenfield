@@ -90,11 +90,9 @@ function upButton(){
   this.broadcast.emit("up button", {id:this.id});
 }
 
-
 function shootButton(){
   console.log("A SHOOT BUTTON WAS PRESSED!!");
   this.broadcast.emit("shoot button", {id:this.id});
-
 }
 
 
