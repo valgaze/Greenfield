@@ -173,6 +173,21 @@ var mainState = {
 
 
   update: function () {
+
+
+    game.physics.arcade.collide(players);
+    //game.physics.arcade.collide(players,projectiles);
+
+    game.physics.arcade.overlap(players, projectiles, function(player,projectile) {
+      projectile.kill();
+      player.health--;
+      console.log('Someone got shot and now they have ' + player.health + ' health left.');
+      socket.emit("player shot", {id: player.theId, health: player.health});
+    }, null, this);
+
+
+
+
     game.physics.arcade.collide(players);
     //game.physics.arcade.collide(players,projectiles);
 
