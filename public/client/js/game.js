@@ -17,9 +17,9 @@ var playerSpots = {};
 var mainState = {
   preload: function () {
     game.stage.backgroundColor = '#666';
-    game.load.image('player', 'assets/player.png');
+    game.load.image('player', 'assets/sumo4.png');
     game.load.image('ground', 'assets/ground.png');
-    game.load.image('projectile', 'assets/wall.png');
+    game.load.image('projectile', 'assets/tomato2.png');
     game.load.image('gameover', 'assets/gameover.png');
     game.stage.disableVisibilityChange = true;
 
@@ -37,6 +37,7 @@ var mainState = {
 
     console.log('create function called');
     
+
 
     game.physics.startSystem(Phaser.Physics.ARCADE);
     players = game.add.group();
@@ -261,8 +262,22 @@ var mainState = {
     if (alive.length === 1 && dead.length !== 0 && !winnerAnnounced){
       console.log('Player ' + alive[0] + ' won the game.');
       winnerAnnounced = true;
+
     }
 
+    if (winnerAnnounced) {
+      //clear out old game data
+      var winner = alive[0];
+      alive = [];
+      dead = [];
+      players.destroy(true);
+      // for (var i = 0; i< players.children.length; i++){
+      //   players.children[i].destroy(true);
+      // }
+      winnerAnnounced = false;
+      //change game state
+      game.state.start("GameOver");
+    }
 
 
     
