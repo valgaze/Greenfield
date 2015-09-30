@@ -152,14 +152,8 @@ var mainState = {
         alive.push(player.theId);
         //console.log("group", players)
      });
-
-
     projectiles = game.add.group();  // add a new group for fireballs
     projectiles.createMultiple(500, 'projectile', 0, false);
-
-
-
-
   },
 
 
@@ -185,7 +179,6 @@ var mainState = {
         players.children[j].body.velocity.x = 0;
       }
     }
-
 
     for (var i = 0; i< players.children.length; i++){
       if (players.children[i].health <= 0){
