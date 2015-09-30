@@ -169,7 +169,8 @@ var mainState = {
     game.physics.arcade.overlap(players, projectiles, function(player,projectile) {
       projectile.kill();
       player.health--;
-      console.log('Someone got shot and now they have ' + player.health + ' health left.')
+      console.log('Someone got shot and now they have ' + player.health + ' health left.');
+      socket.emit("player shot", {id: player.theId, health: player.health});
     }, null, this);
 
 
