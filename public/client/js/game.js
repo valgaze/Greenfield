@@ -188,11 +188,11 @@ mainState.prototype = {
 
   update: function () {
 
-
     game.physics.arcade.collide(players);
     //game.physics.arcade.collide(players,projectiles);
 
     game.physics.arcade.overlap(players, projectiles, function(player,projectile) {
+      player.body.velocity.x = projectile.body.velocity.x;
       projectile.kill();
       player.health--;
       console.log('Someone got shot and now they have ' + player.health + ' health left.');
