@@ -185,6 +185,7 @@ mainState.prototype = {
 
 
   update: function () {
+
     game.physics.arcade.collide(players);
     //game.physics.arcade.collide(players,projectiles);
 
