@@ -2,9 +2,16 @@
 
 var socket = io();
 
+var alive = [];
+var dead = [];
+var someoneKilled = false;
+var winnerAnnounced = false;
 var projectiles;
-var nextFire = 0;
-var fireRate = 100;
+
+// var nextFire = 0;
+// var fireRate = 100;
+// var shotsFired = false;
+
 var mainState = {
   preload: function () {
     game.stage.backgroundColor = '#666';
@@ -104,7 +111,7 @@ var mainState = {
             }
      });
 
-    socket.on("down button", function(data){
+    socket.on("shoot button", function(data){
       for (var i = 0; i < players.children.length; i++){
         if (players.children[i].theId === data.id){
             players.children[i].fire_now();
@@ -125,34 +132,55 @@ var mainState = {
         player.body.bounce.y = 0.5;
         player.body.collideWorldBounds = true;
         player.facing = 1;
+        player.fireRate = 500;
+        player.nextFire = 0;
+        player.health = 5;
         player.fire_now = function(){
-          if (game.time.now > nextFire){
-            nextFire = game.time.now + fireRate;
+          if (game.time.now > player.nextFire){
+            player.nextFire = game.time.now + player.fireRate;
             var projectile = projectiles.getFirstExists(false); // get the first created fireball that no exists atm
             if (projectile){
+              projectile.owner = player.theId;
               projectile.exists = true;  // come to existance !
               projectile.lifespan=2500;  // remove the fireball after 2500 milliseconds - back to non-existance
-              projectile.reset(player.x + 20 * player.facing, player.y);
+              projectile.reset(player.x + 50 * player.facing, player.y);
               game.physics.arcade.enable(projectile);
               projectile.body.velocity.x = 1000 * player.facing;
             }
           }
+
         };
-        console.log("group", players);
-      
+        alive.push(player.theId);
+        //console.log("group", players)
      });
-
-
     projectiles = game.add.group();  // add a new group for fireballs
     projectiles.createMultiple(500, 'projectile', 0, false);
-
-
-
-
   },
 
 
   update: function () {
+
+    game.physics.arcade.collide(players);
+    //game.physics.arcade.collide(players,projectiles);
+
+    game.physics.arcade.overlap(players, projectiles, function(player,projectile) {
+      projectile.kill();
+      player.health--;
+      console.log('Someone got shot and now they have ' + player.health + ' health left.')
+    }, null, this);
+
+
+
+    game.physics.arcade.collide(players);
+    //game.physics.arcade.collide(players,projectiles);
+
+    game.physics.arcade.overlap(players, projectiles, function(player,projectile) {
+      projectile.kill();
+      player.health--;
+      console.log('Someone got shot and now they have ' + player.health + ' health left.')
+    }, null, this);
+
+
 
     //Check for collisions between any players and the ground.
     
@@ -163,6 +191,55 @@ var mainState = {
         players.children[j].body.velocity.x = 0;
       }
     }
+
+    for (var i = 0; i< players.children.length; i++){
+      if (players.children[i].health <= 0){
+        if (dead.indexOf(players.children[i].theId)===-1){
+          //console.log(alive.splice(alive.indexOf(players.children[i].theId),1));
+          var justDead = alive.splice(alive.indexOf(players.children[i].theId),1);
+          console.log(justDead[0]);
+          dead.push(justDead[0]);
+          someoneKilled = true;
+        }
+        players.children[i].kill();
+      }
+    }
+
+    if (someoneKilled){
+      console.log("Player " + dead[dead.length-1] + " has died.");
+      someoneKilled = false;
+      socket.emit("player killed", {id: dead[dead.length-1]});
+    }
+
+    if (alive.length === 1 && dead.length !== 0 && !winnerAnnounced){
+      console.log('Player ' + alive[0] + ' won the game.');
+      winnerAnnounced = true;
+    }
+
+    for (var i = 0; i< players.children.length; i++){
+      if (players.children[i].health <= 0){
+        if (dead.indexOf(players.children[i].theId)===-1){
+          //console.log(alive.splice(alive.indexOf(players.children[i].theId),1));
+          var justDead = alive.splice(alive.indexOf(players.children[i].theId),1);
+          console.log(justDead[0]);
+          dead.push(justDead[0]);
+          someoneKilled = true;
+        }
+        players.children[i].kill();
+      }
+    }
+
+    if (someoneKilled){
+      console.log("Player " + dead[dead.length-1] + " has died.");
+      someoneKilled = false;
+      socket.emit("player killed", {id: dead[dead.length-1]});
+    }
+
+    if (alive.length === 1 && dead.length !== 0 && !winnerAnnounced){
+      console.log('Player ' + alive[0] + ' won the game.');
+      winnerAnnounced = true;
+    }
+
 
 
     
@@ -176,9 +253,10 @@ be run in the phaser update loop rather than on socket emit events.
 
 
     var cursors = game.input.keyboard.createCursorKeys();
-    if (cursors.left.isDown){
-      console.log("shoot button pressed");
-      this.fire_now();
+    if (cursors.left.isDown)
+    { 
+      players.scale = (2,2);
+      // shotsFired = true;
     }
 
     
