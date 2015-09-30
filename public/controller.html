@@ -6,7 +6,7 @@
   <script src="https://cdn.socket.io/socket.io-1.2.0.js"></script>
   <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/phaser/2.4.3/phaser.js"></script>
   <script type="text/javascript">
-  var game = new Phaser.Game(450, 150, Phaser.AUTO, 'gameContainer');
+  var game = new Phaser.Game(450, 250, Phaser.AUTO, 'gameContainer');
 
 
     var socket = io();
@@ -17,6 +17,7 @@
     var up = false;
     var jump=false;
     var shoot=false;
+    var playerNumber = false;
     
     var mainState = {
       preload: function () {
@@ -35,7 +36,6 @@
         this.scale.leaveIncorrectOrientation.add(this.leaveIncorrectOrientation, this);
 
 
-
     // // fullscreen setup
         game.scale.scaleMode = Phaser.ScaleManager.SHOW_ALL;
         game.scale.fullScreenScaleMode = Phaser.ScaleManager.EXACT_FIT;
@@ -43,13 +43,19 @@
       },
       create: function () {
 
-        socket.emit('new player', {});
+       socket.emit('new player', {});
         socket.on("confirmPlayer", function(data){
-            alert(data.message)
+          if (!playerNumber){
+            playerNumber = data.playerNumber;
+          }
+          addText(game, "Player_num: " + playerNumber +
+          "\n Strength: 5");
         });
 
         socket.on("rejectPlayer", function(data){
-            alert(data.message)
+          addText(game, data.message);
+
+          console.log(data.message);
         });
 
         buttonleft = game.add.button(0, 0, 'buttonhorizontal', null, this, 0, 1, 0, 1);
@@ -68,7 +74,6 @@
         buttonA = game.add.button(0, 100, 'buttonhorizontal', null, this, 0, 1, 0, 1);
             buttonA.events.onInputDown.add(function(){shoot=true;});
             buttonA.events.onInputUp.add(function(){shoot=false;});
-
 
       },
       update: function () {
@@ -105,7 +110,18 @@
     game.state.start('main');
 
 function gofull() { game.scale.startFullScreen(false);}
+function addText(game, message, configObj){
 
+  if (!configObj){
+    var style = { font: 'bold 15pt Arial', fill: 'white', align: 'left', wordWrap: true, wordWrapWidth: 450};
+  }else{
+    var style = configObj;
+  }
+
+  var text = game.add.text(game.world.centerX, game.world.centerY, message, style);
+  text.anchor.set(0.5);
+
+}
 
 
     </script>
