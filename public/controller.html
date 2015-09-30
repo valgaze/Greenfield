@@ -18,7 +18,8 @@
     var jump=false;
     var shoot=false;
     var playerNumber = false;
-    
+    var textRef;
+
     var mainState = {
       preload: function () {
         game.stage.backgroundColor = '#666';
@@ -58,7 +59,11 @@
           console.log(data.message);
         });
 
-        socket.on("player killed", onDeath);
+        socket.on("player shot", function(data){
+          onPlayerShot(data);
+        });
+
+        socket.on("player killed", onPlayerDeath);
 
         buttonleft = game.add.button(0, 0, 'buttonhorizontal', null, this, 0, 1, 0, 1);
             buttonleft.events.onInputDown.add(function(){left=true;});
@@ -122,14 +127,18 @@ function addText(game, message, configObj){
 
   var text = game.add.text(game.world.centerX, game.world.centerY, message, style);
   text.anchor.set(0.5);
+  textRef = text;
 
 }
 
-function onDeath (){
+function onPlayerDeath (){
   alert('Here is a handler for on death events.\nMaybe we\'ll want the screen to shake or make a noise or whatever')
-
 }
-
+function onPlayerShot (data) {
+  //Callback for player shot events
+  textRef.setText("Player_num: " + playerNumber +
+  "\n Strength: " + data.health);
+}
 
     </script>
   </head>
