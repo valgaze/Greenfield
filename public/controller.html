@@ -44,7 +44,7 @@
       },
       create: function () {
 
-       socket.emit('new player', {});
+       socket.emit('add player', {});
         socket.on("confirmPlayer", function(data){
           if (!playerNumber){
             playerNumber = data.playerNumber;

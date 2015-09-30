@@ -40,9 +40,12 @@ var mainState = {
 
 
     game.physics.startSystem(Phaser.Physics.ARCADE);
+    
+    // var players;
+    // if(!players){
+    // players = players || game.add.group();
+    // players.enableBody = true;
     players = game.add.group();
-    players.enableBody = true;
-  
 
     this.platforms = game.add.group();
     this.platforms.enableBody = true;
@@ -141,6 +144,7 @@ var mainState = {
         console.log("from server", data.id, "player number is ",data.playerNumber);
         var playerNumber = data.playerNumber;
         var player = players.create(playerSpots[playerNumber].x, playerSpots[playerNumber].y, 'player');
+
         player.theId = data.id;
         game.physics.arcade.enable(player);
         player.body.gravity.y = 1000;
@@ -188,19 +192,6 @@ var mainState = {
 
 
 
-
-    game.physics.arcade.collide(players);
-    //game.physics.arcade.collide(players,projectiles);
-
-    game.physics.arcade.overlap(players, projectiles, function(player,projectile) {
-      player.body.velocity.x = projectile.body.velocity.x;
-      projectile.kill();
-      player.health--;
-      console.log('Someone got shot and now they have ' + player.health + ' health left.')
-    }, null, this);
-
-
-
     //Check for collisions between any players and the ground.
     
     for (var i = 0; i < this.ground.length; i++) {
@@ -240,43 +231,20 @@ var mainState = {
       winnerAnnounced = true;
     }
 
-    for (var i = 0; i< players.children.length; i++){
-      if (players.children[i].health <= 0){
-        if (dead.indexOf(players.children[i].theId)===-1){
-          //console.log(alive.splice(alive.indexOf(players.children[i].theId),1));
-          var justDead = alive.splice(alive.indexOf(players.children[i].theId),1);
-          console.log(justDead[0]);
-          dead.push(justDead[0]);
-          someoneKilled = true;
-        }
-        players.children[i].kill();
-      }
-    }
-
-    if (someoneKilled){
-      console.log("Player " + dead[dead.length-1] + " has died.");
-      someoneKilled = false;
-      socket.emit("player killed", {id: dead[dead.length-1]});
-    }
-
-    if (alive.length === 1 && dead.length !== 0 && !winnerAnnounced){
-      console.log('Player ' + alive[0] + ' won the game.');
-      winnerAnnounced = true;
-
-    }
-
+    
     if (winnerAnnounced) {
       //clear out old game data
       var winner = alive[0];
+      game.state.start("GameOver", true, false);
       alive = [];
       dead = [];
       players.destroy(true);
+      // players = null;
       // for (var i = 0; i< players.children.length; i++){
       //   players.children[i].destroy(true);
       // }
       winnerAnnounced = false;
       //change game state
-      game.state.start("GameOver");
     }
 
 

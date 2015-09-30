@@ -2,7 +2,7 @@ var gameOver = function(game){};
  
 gameOver.prototype = {
   init: function(){
-    // alert("You lose!");
+    // alert("Winner: ", winner);
   },
 
   preLoad: function(){
@@ -17,6 +17,6 @@ gameOver.prototype = {
   playButton.anchor.setTo(0.5,0.5);
   },
   playTheGame: function(){
-    this.game.state.start("Main");
+    this.game.state.start("Lobby");
   }
 };
