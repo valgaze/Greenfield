@@ -196,7 +196,6 @@ mainState.prototype = {
   update: function () {
 
     game.physics.arcade.collide(players);
-    //game.physics.arcade.collide(players,projectiles);
 
     game.physics.arcade.overlap(this.platforms, projectiles, function(platform,projectile) {
       projectile.kill();
