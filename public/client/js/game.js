@@ -1,17 +1,17 @@
-var game = new Phaser.Game(800, 600, Phaser.AUTO, 'gameContainer');
+// var game = new Phaser.Game(800, 600, Phaser.AUTO, 'gameContainer');
 
 var socket = io();
 
 var projectiles;
 var nextFire = 0;
 var fireRate = 100;
-// var shotsFired = false;
 var mainState = {
   preload: function () {
     game.stage.backgroundColor = '#666';
-    game.load.image('player', 'assets/player.png'); 
+    game.load.image('player', 'assets/player.png');
     game.load.image('ground', 'assets/ground.png');
-    game.load.image('projectile', 'assets/wall.png')
+    game.load.image('projectile', 'assets/wall.png');
+    game.load.image('gameover', 'assets/gameover.png');
     game.stage.disableVisibilityChange = true;
   },
   create: function () {
@@ -21,16 +21,7 @@ var mainState = {
     game.physics.startSystem(Phaser.Physics.ARCADE);
     players = game.add.group();
     players.enableBody = true;
-    //game.physics.enable(players, Phaser.Physics.ARCADE);
-
-    //Player ceation handled below
-    // this.player = this.game.add.sprite(100, 245, 'player');
-    // game.physics.arcade.enable(this.player);
-    // this.player.body.gravity.y = 1000; 
-    // this.player.body.bounce.y = 0.5;
-    // this.player.body.collideWorldBounds = true;
-    
-
+  
 
     this.platforms = game.add.group();
     this.platforms.enableBody = true;
@@ -57,9 +48,7 @@ var mainState = {
         this.ground[j].body.immovable = true;
       }
     //Listeners
-   // var that = this;
-
-
+  
     socket.on("remove player", function(data){
 
           // that.player.body.velocity.x = -200;
@@ -89,7 +78,6 @@ var mainState = {
      });
 
     socket.on("right button", function(data){
-         // that.player.body.velocity.x = 200;
         for (var i = 0; i < players.children.length; i++){
             if (players.children[i].theId === data.id){
                 players.children[i].body.velocity.x = 200;
@@ -104,10 +92,10 @@ var mainState = {
      });
     
     socket.on("up button", function(data){
-          // that.player.body.velocity.y = -600;
           for (var i = 0; i < players.children.length; i++){
               if (players.children[i].theId === data.id){
                   players.children[i].body.velocity.y = -600;
+                  
               }else{
                 console.log(players.children[i], i);
                 console.log("instanceid:", players.children[i].theId);
@@ -129,12 +117,11 @@ var mainState = {
     });
 
     socket.on("new player", function(data){
-        //players.create(360 + Math.random() * 200, 120 + Math.random() * 200, 'player');
         console.log("from server", data.id);
         var player = players.create(200,50, 'player');
         player.theId = data.id;
         game.physics.arcade.enable(player);
-        player.body.gravity.y = 1000; 
+        player.body.gravity.y = 1000;
         player.body.bounce.y = 0.5;
         player.body.collideWorldBounds = true;
         player.facing = 1;
@@ -150,8 +137,8 @@ var mainState = {
               projectile.body.velocity.x = 1000 * player.facing;
             }
           }
-        }
-        console.log("group", players)
+        };
+        console.log("group", players);
       
      });
 
@@ -177,6 +164,7 @@ var mainState = {
       }
     }
 
+
     
 
 /*******************
@@ -186,54 +174,22 @@ status of buttons here in phaser. Then button press consequences would
 be run in the phaser update loop rather than on socket emit events.
 ********************/
 
-  //   this.player.body.velocity.x = 0;
 
     var cursors = game.input.keyboard.createCursorKeys();
-    if (cursors.left.isDown)
-    { 
+    if (cursors.left.isDown){
       console.log("shoot button pressed");
       this.fire_now();
-      // shotsFired = true;
-
     }
 
-    // cursors.left.isUp
-    // { 
-    //   console.log("shoot button released");
-    //     shotsFired = false;
-
-    // }
-  //   else if (cursors.right.isDown)
-  //   {
-  //       this.player.body.velocity.x = 150;
-  //       // cursors.up.isDown = false;
-
-  //   }
-  //   if (cursors.up.isDown && this.player.body.touching.down)
-  //   {
-  //       socket.emit("up button", {somedata:"some value"});
-
-  //       this.player.body.velocity.y = -600;
-  //   }
+    
   },
-  // fire_now: function(){
-  //   if (game.time.now > nextFire){
-  //     nextFire = game.time.now + fireRate;
-  //     var projectile = projectiles.getFirstExists(false); // get the first created fireball that no exists atm
-  //     if (projectile){
-  //       projectile.exists = true;  // come to existance !
-  //       projectile.lifespan=2500;  // remove the fireball after 2500 milliseconds - back to non-existance
-  //       projectile.reset(players.children[0].x + 20 * players.children[0].facing, players.children[0].y);
-  //       game.physics.arcade.enable(projectile);
-  //       projectile.body.velocity.x = 1000 * players.children[0].facing;
-  //     }
-  //   }
-  // }
+
+  //TODO: call this on end of game
+  endGame: function () {
+    game.state.start("GameOver");
+  }
+  
 };
 
 
-
-
-game.state.add('main', mainState);
-game.state.start('main');
 
