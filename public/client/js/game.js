@@ -32,7 +32,7 @@ socket.on("new player", function(data){
           projectile.owner = player.theId;
           projectile.exists = true;  // come to existance !
           projectile.lifespan=2500;  // remove the fireball after 2500 milliseconds - back to non-existance
-          projectile.reset(player.x + 50 * player.facing, player.y);
+          projectile.reset(player.x + 100 * player.facing, player.y);
           game.physics.arcade.enable(projectile);
           projectile.body.velocity.x = 1000 * player.facing;
         }
