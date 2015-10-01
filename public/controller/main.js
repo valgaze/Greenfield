@@ -16,6 +16,7 @@
         game.load.image('player', 'assets/player.png'); 
         game.load.image('ground', 'assets/ground.png');
 
+
         game.load.image('jump_button', 'assets/jump.png');
         game.load.image('fire_button', 'assets/fire.png');
         game.load.image('left_button', 'assets/left.png');
