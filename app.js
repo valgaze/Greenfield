@@ -35,6 +35,7 @@ app.get('/controller', function(req, res){
 app.use(express.static(path.join(__dirname, 'public/client')));
 app.use('/js', express.static(path.join(__dirname, 'public/client/js')));
 app.use('/lib', express.static(path.join(__dirname, 'public/client/lib')));
+app.use('/controller', express.static(path.join(__dirname, 'public/controller')));
 
 
 var globals = {};
