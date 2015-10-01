@@ -96,12 +96,6 @@ function upButton(){
 }
 
 function shootButton(){
-  console.log("A SHOOT BUTTON WAS PRESSED!!");
-  this.broadcast.emit("shoot button", {id:this.id});
-}
-
-function shootButton(){
-  console.log("A SHOOT BUTTON WAS PRESSED!!");
   this.broadcast.emit("shoot button", {id:this.id});
 }
 
@@ -127,48 +121,33 @@ function onNewPlayer() {
 
     io.to(this.id).emit('confirmPlayer', {id: this.id, playerNumber: playerNumber, message: "You are player " + playerNumber});
 
-    console.log("added you in!");
-    console.log("all the players", globals.currentPlayers);
+    console.log("New player added, all players:", globals.currentPlayers);
   }else{
     io.to(this.id).emit('rejectPlayer', {id: this.id, playerNumber: false, message: "Sorry, too many players"});
 
-    console.log("Sorry fella all full!");
-    console.log("all the players", globals.currentPlayers);
+    console.log("Player rejected because full, all players", globals.currentPlayers);
   }
 };
 
 function onGameStart() {
 
   for (var i = 0; i < globals.currentPlayers.length; i++){
-    //globals.currentPlayers.push(this.id);
-    // var playerNumber = exports.helpers.findArrayIndex(this.id, globals.currentPlayers) + 1;
+   
     this.emit("new player", {id: globals.currentPlayers[i],playerNumber: i+1});
 
-    // io.to(this.id).emit('confirmPlayer', {id: this.id, playerNumber: playerNumber, message: "You are player " + playerNumber});
-
-    // console.log("added you in!");
-    // console.log("all the players", globals.currentPlayers);
   }
-   // else{
-  //   io.to(this.id).emit('rejectPlayer', {id: this.id, playerNumber: false, message: "Sorry, too many players"});
 
-  //   console.log("Sorry fella all full!");
-  //   console.log("all the players", globals.currentPlayers);
-  // }
 };
 
 // Emits "remove player" event to all connected clients.
 // Event payload is the id of the socket that created the new player.
 function onClientDisconnect() {
-  console.log('this client left', this.id);
-  console.log('Before dong anything, the array looks like this:', globals.currentPlayers);
   var id = this.id;
 
   var index = exports.helpers.findArrayIndex(id, globals.currentPlayers);
   if (index > -1){
     exports.helpers.removeFromArray(index, globals.currentPlayers);
-    this.broadcast.emit("remove player", {id: this.id});
-    console.log('player removed, now array looks like this:', globals.currentPlayers);    
+    this.broadcast.emit("remove player", {id: this.id});  
   }
 
 };
