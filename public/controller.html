@@ -25,7 +25,15 @@
         game.stage.backgroundColor = '#666';
         game.load.image('player', 'assets/player.png'); 
         game.load.image('ground', 'assets/ground.png');
-        game.load.spritesheet('buttonhorizontal', 'assets/square.png',100,100);
+
+        game.load.spritesheet('right_button', 'assets/player.png',100,100);
+
+        game.load.image('jump_button', 'assets/jump.png');
+        game.load.image('fire_button', 'assets/fire.png');
+        game.load.image('left_button', 'assets/left.png');
+        game.load.image('right_button', 'assets/right.png');
+
+
         game.stage.disableVisibilityChange = true;
         this.scale.scaleMode = Phaser.ScaleManager.SHOW_ALL;
         this.scale.setMinMax(480, 260, 1024, 768);
@@ -65,20 +73,30 @@
 
         socket.on("player killed", onPlayerDeath);
 
-        buttonleft = game.add.button(0, 0, 'buttonhorizontal', null, this, 0, 1, 0, 1);
+      //left
+      var topRow = 65; //Common shifting amount
+
+        buttonleft = game.add.button(0, topRow, 'left_button', null, this, 0, 1, 0, 1);
             buttonleft.events.onInputDown.add(function(){left=true;});
             buttonleft.events.onInputUp.add(function(){left=false;});
+            // buttonleft.height = game.height - topRow;
+            // buttonleft.width = buttonleft.height/2
 
-        buttonjump = game.add.button(150, 0, 'buttonhorizontal', null, this, 0, 1, 0, 1);
-            buttonjump.events.onInputDown.add(function(){up=true;});
-            buttonjump.events.onInputUp.add(function(){up=false;});
-
-
-        buttonright = game.add.button(300, 0, 'buttonhorizontal', null, this, 0, 1, 0, 1);
+      //right
+        buttonright = game.add.button(150, topRow, 'right_button', null, this, 0, 1, 0, 1);
             buttonright.events.onInputDown.add(function(){right=true;});
             buttonright.events.onInputUp.add(function(){right=false;});
+            // buttonright.height = game.height - topRow;
+            // buttonright.width = buttonright.height/2
 
-        buttonA = game.add.button(0, 100, 'buttonhorizontal', null, this, 0, 1, 0, 1);
+      //jump
+        buttonB = game.add.button(300, 0, 'jump_button', null, this, 0, 1, 0, 1);
+            buttonB.events.onInputDown.add(function(){up=true;});
+            buttonB.events.onInputUp.add(function(){up=false;});
+      
+
+      //Special_A
+        buttonA = game.add.button(300, 100, 'fire_button', null, this, 0, 1, 0, 1);
             buttonA.events.onInputDown.add(function(){shoot=true;});
             buttonA.events.onInputUp.add(function(){shoot=false;});
 
@@ -125,8 +143,8 @@ function addText(game, message, configObj){
     var style = configObj;
   }
 
-  var text = game.add.text(game.world.centerX, game.world.centerY, message, style);
-  text.anchor.set(0.5);
+  var text = game.add.text(0, 0, message, style);
+  text.anchor.set(0);
   textRef = text;
 
 }
