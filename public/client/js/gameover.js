@@ -17,6 +17,7 @@ gameOver.prototype = {
   playButton.anchor.setTo(0.5,0.5);
   },
   playTheGame: function(){
-    this.game.state.start("Lobby");
+
+    this.game.state.start("Lobby", true, false);
   }
 };
