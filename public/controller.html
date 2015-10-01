@@ -58,6 +58,8 @@
           console.log(data.message);
         });
 
+        socket.on("player killed", onDeath);
+
         buttonleft = game.add.button(0, 0, 'buttonhorizontal', null, this, 0, 1, 0, 1);
             buttonleft.events.onInputDown.add(function(){left=true;});
             buttonleft.events.onInputUp.add(function(){left=false;});
@@ -120,6 +122,11 @@ function addText(game, message, configObj){
 
   var text = game.add.text(game.world.centerX, game.world.centerY, message, style);
   text.anchor.set(0.5);
+
+}
+
+function onDeath (){
+  alert('Here is a handler for on death events.\nMaybe we\'ll want the screen to shake or make a noise or whatever')
 
 }
 
