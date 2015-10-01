@@ -7,6 +7,8 @@ var dead = [];
 var someoneKilled = false;
 var winnerAnnounced = false;
 var projectiles;
+var playerSpots = {};
+
 
 // var nextFire = 0;
 // var fireRate = 100;
@@ -20,8 +22,16 @@ var mainState = {
     game.load.image('projectile', 'assets/wall.png');
     game.load.image('gameover', 'assets/gameover.png');
     game.stage.disableVisibilityChange = true;
+
   },
   create: function () {
+
+    playerSpots = {
+      1:{x:60,y:1},
+      2:{x:game.world.width-100, y:1},
+      3:{x:60,y:game.world.height-200},
+      4:{x:game.world.width-100,y:game.world.height-200}
+    };
 
     socket.emit("game start");
 
@@ -127,8 +137,9 @@ var mainState = {
     });
 
     socket.on("new player", function(data){
-        console.log("from server", data.id);
-        var player = players.create(200,50, 'player');
+        console.log("from server", data.id, "player number is ",data.playerNumber);
+        var playerNumber = data.playerNumber;
+        var player = players.create(playerSpots[playerNumber].x, playerSpots[playerNumber].y, 'player');
         player.theId = data.id;
         game.physics.arcade.enable(player);
         player.body.gravity.y = 1000;
@@ -162,22 +173,11 @@ var mainState = {
 
 
   update: function () {
-
     game.physics.arcade.collide(players);
     //game.physics.arcade.collide(players,projectiles);
 
     game.physics.arcade.overlap(players, projectiles, function(player,projectile) {
-      projectile.kill();
-      player.health--;
-      console.log('Someone got shot and now they have ' + player.health + ' health left.')
-    }, null, this);
-
-
-
-    game.physics.arcade.collide(players);
-    //game.physics.arcade.collide(players,projectiles);
-
-    game.physics.arcade.overlap(players, projectiles, function(player,projectile) {
+      player.body.velocity.x = projectile.body.velocity.x;
       projectile.kill();
       player.health--;
       console.log('Someone got shot and now they have ' + player.health + ' health left.')
@@ -191,7 +191,12 @@ var mainState = {
       //game.physics.arcade.collide(this.player, this.ground[i]);
       for (var j = 0; j < players.children.length; j++){
         game.physics.arcade.collide(players.children[j], this.ground[i]);
-        players.children[j].body.velocity.x = 0;
+        if (players.children[j].body.velocity.x>0){
+          players.children[j].body.velocity.x -= 1;   
+        }
+        else if (players.children[j].body.velocity.x<0){
+          players.children[j].body.velocity.x += 1;
+        }
       }
     }
 
