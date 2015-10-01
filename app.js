@@ -35,7 +35,7 @@ app.get('/controller', function(req, res){
 app.use(express.static(path.join(__dirname, 'public/client')));
 app.use('/js', express.static(path.join(__dirname, 'public/client/js')));
 app.use('/lib', express.static(path.join(__dirname, 'public/client/lib')));
-
+app.use('/controller', express.static(path.join(__dirname, 'public/controller')));
 
 var globals = {};
 globals.currentPlayers = [];
@@ -65,6 +65,11 @@ io.on('connection', function(socket){
   socket.on("player killed", playerKilled);
 
   socket.on("player shot", playerShot);
+
+  socket.on("player ready", playerReady);
+
+  socket.on("game over", gameOver);
+  
 
 
 });
@@ -105,6 +110,17 @@ function playerKilled(data){
 function playerShot(data){
   io.to(data.id).emit('player shot', {id: data.id, health: data.health});
 }
+function playerReady(){ 
+  //This function will send a global "activate player" event to all sockets
+  //If a player indicates they're ready (ie pressed start button) activate player will in the controller
+  //give them the button view.
+  //This event also will on the main game client "start" a match
+  io.sockets.emit("activate player", {});    
+}
+function gameOver(data){
+  console.log("ALERT: The winner was...", data.id); 
+  io.sockets.emit("activate player", {});    
+}
 
 /*****************************
   CONNECT/DISCONNECT HANDLERS
@@ -115,13 +131,17 @@ function playerShot(data){
 function onNewPlayer() {
 
   if (globals.currentPlayers.length < 4){
-    globals.currentPlayers.push(this.id);
-    var playerNumber = exports.helpers.findArrayIndex(this.id, globals.currentPlayers) + 1;
-    //this.broadcast.emit("new player", {id: this.id, playerNumber: playerNumber});
 
-    io.to(this.id).emit('confirmPlayer', {id: this.id, playerNumber: playerNumber, message: "You are player " + playerNumber});
+    if (globals.currentPlayers.indexOf(this.id) === -1){
+      globals.currentPlayers.push(this.id);
+      var playerNumber = exports.helpers.findArrayIndex(this.id, globals.currentPlayers) + 1;
+      //this.broadcast.emit("new player", {id: this.id, playerNumber: playerNumber});
 
-    console.log("New player added, all players:", globals.currentPlayers);
+      io.to(this.id).emit('confirmPlayer', {id: this.id, playerNumber: playerNumber, message: "You are player " + playerNumber});
+
+      console.log("New player added, all players:", globals.currentPlayers);      
+    }
+
   }else{
     io.to(this.id).emit('rejectPlayer', {id: this.id, playerNumber: false, message: "Sorry, too many players"});
 
