@@ -228,6 +228,7 @@ mainState.prototype = {
     if (winnerAnnounced) {
       // var winner = alive[0];
       //change game state
+      socket.emit("game over", {id: alive[0]});
       game.state.start("GameOver", true, false);
       //clear out old game data
       alive = [];
