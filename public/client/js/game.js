@@ -8,13 +8,48 @@ var someoneKilled = false;
 var winnerAnnounced = false;
 var projectiles;
 var playerSpots = {};
+socket.on("new player", function(data){
+
+  console.log("from server", data.id, "player number is ",data.playerNumber);
+  if(alive.indexOf(data.id) === -1){
+    var playerNumber = data.playerNumber;
+    var player = players.create(playerSpots[playerNumber].x, playerSpots[playerNumber].y, 'player');
+
+    player.theId = data.id;
+    game.physics.arcade.enable(player);
+    player.body.gravity.y = 1000;
+    player.body.bounce.y = 0.5;
+    player.body.collideWorldBounds = true;
+    player.facing = 1;
+    player.fireRate = 500;
+    player.nextFire = 0;
+    player.health = 5;
+    player.fire_now = function(){
+      if (game.time.now > player.nextFire){
+        player.nextFire = game.time.now + player.fireRate;
+        var projectile = projectiles.getFirstExists(false); // get the first created fireball that no exists atm
+        if (projectile){
+          projectile.owner = player.theId;
+          projectile.exists = true;  // come to existance !
+          projectile.lifespan=2500;  // remove the fireball after 2500 milliseconds - back to non-existance
+          projectile.reset(player.x + 50 * player.facing, player.y);
+          game.physics.arcade.enable(projectile);
+          projectile.body.velocity.x = 1000 * player.facing;
+        }
+      }
+
+    };
+    alive.push(player.theId);
+  }
+ });
 
 
-// var nextFire = 0;
-// var fireRate = 100;
-// var shotsFired = false;
 
-var mainState = {
+mainState = function(game){};
+
+mainState.prototype = {
+
+  
   preload: function () {
     game.stage.backgroundColor = '#666';
     game.load.image('player', 'assets/sumo4.png');
@@ -25,7 +60,6 @@ var mainState = {
 
   },
   create: function () {
-
     playerSpots = {
       1:{x:60,y:1},
       2:{x:game.world.width-100, y:1},
@@ -41,10 +75,9 @@ var mainState = {
 
     game.physics.startSystem(Phaser.Physics.ARCADE);
     
-    // var players;
-    // if(!players){
-    // players = players || game.add.group();
-    // players.enableBody = true;
+    
+    players = null;
+    console.log('no players');
     players = game.add.group();
 
     this.platforms = game.add.group();
@@ -75,7 +108,6 @@ var mainState = {
   
     socket.on("remove player", function(data){
 
-          // that.player.body.velocity.x = -200;
           for (var i = 0; i < players.children.length; i++){
               if (players.children[i].theId === data.id){
                   players.children[i].destroy();
@@ -94,9 +126,7 @@ var mainState = {
                   players.children[i].body.velocity.x = -200;
                   players.children[i].facing = -1;
               }else{
-                console.log(players.children[i], i);
-                console.log("instanceid:", players.children[i].theId);
-                console.log("targetid", data.id);
+        
               }
             }
      });
@@ -121,9 +151,6 @@ var mainState = {
                   players.children[i].body.velocity.y = -600;
                   
               }else{
-                console.log(players.children[i], i);
-                console.log("instanceid:", players.children[i].theId);
-                console.log("targetid", data.id);
               }
             }
      });
@@ -133,45 +160,11 @@ var mainState = {
         if (players.children[i].theId === data.id){
             players.children[i].fire_now();
         }else{
-          console.log(players.children[i], i);
-          console.log("instanceid:", players.children[i].theId);
-          console.log("targetid", data.id);
         }
       }
     });
 
-    socket.on("new player", function(data){
-        console.log("from server", data.id, "player number is ",data.playerNumber);
-        var playerNumber = data.playerNumber;
-        var player = players.create(playerSpots[playerNumber].x, playerSpots[playerNumber].y, 'player');
 
-        player.theId = data.id;
-        game.physics.arcade.enable(player);
-        player.body.gravity.y = 1000;
-        player.body.bounce.y = 0.5;
-        player.body.collideWorldBounds = true;
-        player.facing = 1;
-        player.fireRate = 500;
-        player.nextFire = 0;
-        player.health = 5;
-        player.fire_now = function(){
-          if (game.time.now > player.nextFire){
-            player.nextFire = game.time.now + player.fireRate;
-            var projectile = projectiles.getFirstExists(false); // get the first created fireball that no exists atm
-            if (projectile){
-              projectile.owner = player.theId;
-              projectile.exists = true;  // come to existance !
-              projectile.lifespan=2500;  // remove the fireball after 2500 milliseconds - back to non-existance
-              projectile.reset(player.x + 50 * player.facing, player.y);
-              game.physics.arcade.enable(projectile);
-              projectile.body.velocity.x = 1000 * player.facing;
-            }
-          }
-
-        };
-        alive.push(player.theId);
-        //console.log("group", players)
-     });
     projectiles = game.add.group();  // add a new group for fireballs
     projectiles.createMultiple(500, 'projectile', 0, false);
   },
@@ -233,18 +226,15 @@ var mainState = {
 
     
     if (winnerAnnounced) {
-      //clear out old game data
-      var winner = alive[0];
+      // var winner = alive[0];
+      //change game state
       game.state.start("GameOver", true, false);
+      //clear out old game data
       alive = [];
       dead = [];
       players.destroy(true);
-      // players = null;
-      // for (var i = 0; i< players.children.length; i++){
-      //   players.children[i].destroy(true);
-      // }
+      someoneKilled = false;
       winnerAnnounced = false;
-      //change game state
     }
 
 
