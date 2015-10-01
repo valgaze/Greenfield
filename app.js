@@ -64,6 +64,9 @@ io.on('connection', function(socket){
 
   socket.on("player killed", playerKilled);
 
+  socket.on("player shot", playerShot);
+
+
 });
 
 app.set('port', process.env.PORT || 3000);
@@ -104,6 +107,9 @@ function shootButton(){
 
 function playerKilled(data){
   io.to(data.id).emit('player killed', {id: data.id, message: "You've been tomato'ed"});
+}
+function playerShot(data){
+  io.to(data.id).emit('player shot', {id: data.id, health: data.health});
 }
 
 /*****************************
