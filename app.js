@@ -50,7 +50,7 @@ io.on('connection', function(socket){
 
   socket.on("disconnect", onClientDisconnect);
 
-  socket.on("new player", onNewPlayer);  
+  socket.on("add player", onNewPlayer);  
 
   socket.on("game start", onGameStart);
 
