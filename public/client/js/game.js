@@ -14,6 +14,7 @@ socket.on("new player", function(data){
   if(alive.indexOf(data.id) === -1){
     var playerNumber = data.playerNumber;
     var player = players.create(playerSpots[playerNumber].x, playerSpots[playerNumber].y, 'player');
+    player.anchor.setTo(0.5,0.5); //set middle of image as reference point
 
     player.theId = data.id;
     game.physics.arcade.enable(player);
@@ -32,7 +33,8 @@ socket.on("new player", function(data){
           projectile.owner = player.theId;
           projectile.exists = true;  // come to existance !
           projectile.lifespan=2500;  // remove the fireball after 2500 milliseconds - back to non-existance
-          projectile.reset(player.x + 100 * player.facing, player.y);
+
+          projectile.reset(player.x + 65 * player.facing, player.y - 40);
           game.physics.arcade.enable(projectile);
           projectile.body.velocity.x = 1000 * player.facing;
         }
@@ -51,10 +53,10 @@ mainState.prototype = {
 
   
   preload: function () {
-    game.stage.backgroundColor = '#666';
-    game.load.image('player', 'assets/sumo4.png');
-    game.load.image('ground', 'assets/ground.png');
-    game.load.image('projectile', 'assets/tomato2.png');
+    game.stage.backgroundColor = '#adc165';
+    game.load.image('player', 'assets/sumo_90.png');
+    game.load.image('ground', 'assets/sushi_50.png');
+    game.load.image('projectile', 'assets/tomato_20.png');
     game.load.image('gameover', 'assets/gameover.png');
     game.stage.disableVisibilityChange = true;
 
@@ -85,20 +87,20 @@ mainState.prototype = {
     
     //Create Ground
       this.ground = [];
-      for (var i = 0; i < game.world.width; i+=70) {
-        this.ground.push(this.platforms.create(i, game.world.height - 70, 'ground'));
+      for (var i = 0; i < game.world.width; i+=50) {
+        this.ground.push(this.platforms.create(i, game.world.height - 50, 'ground'));
       }
 
-      for (var i = game.world.width/4; i < game.world.width * (3/4); i+=70) {
+      for (var i = game.world.width/4; i < game.world.width * (3/4); i+=50) {
         this.ground.push(this.platforms.create(i, game.world.height/2, 'ground'));
       }
 
-      for (var i = 0; i < game.world.width * (1/4); i+=70) {
-        this.ground.push(this.platforms.create(i, game.world.height/4 -70, 'ground'));
+      for (var i = 0; i < game.world.width * (1/4); i+=50) {
+        this.ground.push(this.platforms.create(i, game.world.height/4 -50, 'ground'));
       }
 
-      for (var i = game.world.width * (3/4); i < game.world.width; i+=70) {
-        this.ground.push(this.platforms.create(i, game.world.height/4 - 70, 'ground'));
+      for (var i = game.world.width * (3/4); i < game.world.width; i+=50) {
+        this.ground.push(this.platforms.create(i, game.world.height/4 - 50, 'ground'));
       }
 
       for (var j = 0; j < this.ground.length; j++) {
