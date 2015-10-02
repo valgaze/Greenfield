@@ -13,6 +13,7 @@ preload.prototype = {
   create: function(){
     socket.on("activate player", function(data){
       
+
       var style = {
          font: 'bold 32pt Arial',
          fill: 'white',
