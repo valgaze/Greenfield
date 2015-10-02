@@ -12,9 +12,11 @@ lobby.prototype = {
     //gameTitle.anchor.setTo(0.5,0.5);
 
     socket.on("activate player", function(data){
+
       //This is the function called when the server is aware that a player pressed "start"
-      game.state.start("Main");
       socket.emit('add player', {});
+      game.state.start("Main");
+      
 
 
     });
