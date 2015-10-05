@@ -1,3 +1,10 @@
+/*****************************
+  Dead player view
+*****************************/
+  //This is the view displayed to the player's controller when their character runs out of strength
+  //Listens for: "reset controller"
+  //Emits: None
+
 var deadState = function(game){};
 
 deadState.prototype = {
@@ -8,7 +15,7 @@ deadState.prototype = {
   create: function(){
    
     socket.on("reset controllers", function(data){
-      //This is the function called when the server is aware that a player pressed "start"
+      //When the "reset controllers" event is emitted, this view will return to the lobby
       game.state.start("Lobby");
     });
 
