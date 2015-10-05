@@ -50,9 +50,9 @@ io.on('connection', function(socket){
 
   socket.on("disconnect", onClientDisconnect);
 
-  socket.on("add player", onNewPlayer);  
+  // socket.on("add player", onNewPlayer);  
 
-  socket.on("game start", onGameStart);
+  socket.on("game started", onGameStarted);
 
   socket.on("left button", leftButton);
 
@@ -66,12 +66,14 @@ io.on('connection', function(socket){
 
   socket.on("player shot", playerShot);
 
-  socket.on("player ready", playerReady);
+  socket.on("player ready", onNewPlayer);
 
-  socket.on("game over", gameOver);
+  socket.on("player start", onPlayerStart);
+
+  socket.on("game over", onGameOver);
+
+  socket.on("reset game", onResetGame);
   
-
-
 });
 
 app.set('port', process.env.PORT || 3000);
@@ -105,11 +107,14 @@ function shootButton(){
 }
 
 function playerKilled(data){
-  io.to(data.id).emit('player killed', {id: data.id, message: "You've been tomato'ed"});
+  io.to(data.id).emit("controller killed", {id: data.id, message: "You've been tomato'ed"});
 }
+
 function playerShot(data){
   io.to(data.id).emit('player shot', {id: data.id, health: data.health});
 }
+
+
 function playerReady(){ 
   //This function will send a global "activate player" event to all sockets
   //If a player indicates they're ready (ie pressed start button) activate player will in the controller
@@ -117,10 +122,22 @@ function playerReady(){
   //This event also will on the main game client "start" a match
   io.sockets.emit("activate player", {});    
 }
-function gameOver(data){
-  console.log("ALERT: The winner was...", data.id); 
-  io.sockets.emit("activate player", {});    
+
+function onPlayerStart(){
+  if(globals.currentPlayers.length > 1){
+    io.sockets.emit("client start",{});
+  }
+};
+
+function onGameOver(data){
+  console.log("ALERT: The winner was...", data.id);
+  globals.currentPlayers = [];
+  //io.sockets.emit("activate player", {});    
 }
+
+function onResetGame(){
+  io.sockets.emit("reset controllers",{});
+};
 
 /*****************************
   CONNECT/DISCONNECT HANDLERS
@@ -137,25 +154,25 @@ function onNewPlayer() {
       var playerNumber = exports.helpers.findArrayIndex(this.id, globals.currentPlayers) + 1;
       //this.broadcast.emit("new player", {id: this.id, playerNumber: playerNumber});
 
-      io.to(this.id).emit('confirmPlayer', {id: this.id, playerNumber: playerNumber, message: "You are player " + playerNumber});
+      io.to(this.id).emit("confirm player", {id: this.id, playerNumber: playerNumber, message: "You are player " + playerNumber});
 
       console.log("New player added, all players:", globals.currentPlayers);      
     }
 
   }else{
-    io.to(this.id).emit('rejectPlayer', {id: this.id, playerNumber: false, message: "Sorry, too many players"});
+    io.to(this.id).emit("reject player", {id: this.id, playerNumber: false, message: "Sorry, too many players"});
 
-    console.log("Player rejected because full, all players", globals.currentPlayers);
+    console.log("Player rejected because full, all players: ", globals.currentPlayers);
   }
 };
 
-function onGameStart() {
+function onGameStarted() {
 
   for (var i = 0; i < globals.currentPlayers.length; i++){
-   
     this.emit("new player", {id: globals.currentPlayers[i],playerNumber: i+1});
-
   }
+
+  io.sockets.emit("flip controllers",{});
 
 };
 
