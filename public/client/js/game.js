@@ -8,12 +8,13 @@ var someoneKilled = false;
 var winnerAnnounced = false;
 var projectiles;
 var playerSpots = {};
+
 socket.on("new player", function(data){
 
   console.log("from server", data.id, "player number is ",data.playerNumber);
   if(alive.indexOf(data.id) === -1){
     var playerNumber = data.playerNumber;
-    var player = players.create(playerSpots[playerNumber].x, playerSpots[playerNumber].y, 'player');
+    var player = players.create(playerSpots[playerNumber].x, playerSpots[playerNumber].y, playerColors[playerNumber]);
     player.anchor.setTo(0.5,0.5); //set middle of image as reference point
 
     player.theId = data.id;
@@ -44,9 +45,7 @@ socket.on("new player", function(data){
     };
     alive.push(player.theId);
   }
- });
-
-
+});
 
 mainState = function(game){};
 
@@ -56,6 +55,10 @@ mainState.prototype = {
   preload: function () {
     game.stage.backgroundColor = '#adc165';
     game.load.image('player', 'assets/sumo_90.png');
+    game.load.image('player1', 'assets/sumo_90_blue.png');
+    game.load.image('player2', 'assets/sumo_90_orange.png');
+    game.load.image('player3', 'assets/sumo_90_purple.png');
+    game.load.image('player4', 'assets/sumo_90_red.png');
     game.load.image('ground', 'assets/sushi_50.png');
     game.load.image('projectile', 'assets/tomato_20.png');
     game.load.image('gameover', 'assets/gameover.png');
@@ -69,6 +72,16 @@ mainState.prototype = {
       3:{x:60,y:game.world.height-200},
       4:{x:game.world.width-100,y:game.world.height-200}
     };
+
+    playerColors = {
+      1: 'player1',
+      2: 'player2',
+      3: 'player3',
+      4: 'player4'
+    };
+
+
+    
 
     socket.emit("game start");
 
