@@ -7,7 +7,7 @@ preload.prototype = {
     game.stage.backgroundColor = '#adc165';
     this.game.load.image('title', 'assets/title.png');
     this.game.load.image('play', 'assets/playButton.png');
-    socket.on("client start", game.state.start("Main"));
+    socket.on("client start", function(){game.state.start("Main")});
   },
 
   create: function(){
