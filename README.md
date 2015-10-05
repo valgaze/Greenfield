@@ -15,6 +15,7 @@
     a. [Installing Dependencies](#installing-dependencies)
     b. [Tasks](#tasks)
 5. [Contributing](#contributing)
+6. [About](#About)
 
 ## Team
 
@@ -57,3 +58,7 @@ View the project roadmap [here](https://github.com/OrgulousArtichoke/Greenfield/
 ## Contributing
 
 See [CONTRIBUTING.md](CONTRIBUTING.md) for contribution guidelines.
+
+## About
+
+For more info, check out our [website](http://orgulousartichoke.github.io/Greenfield/).
