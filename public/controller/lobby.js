@@ -8,17 +8,10 @@ lobby.prototype = {
   },
 
   create: function(){
-    //var gameTitle = this.game.add.sprite(160,160,'title');
-    //gameTitle.anchor.setTo(0.5,0.5);
 
-    socket.on("activate player", function(data){
-      //This is the function called when the server is aware that a player pressed "start"
-      game.state.start("Main");
-      socket.emit('add player', {});
-
-
-    });
-
+    socket.on("confirm player", function(){game.state.start("Waiting")});
+    socket.on("reject player", function(){game.state.start("Reject")});
+    
     var style = { font: 'bold 12pt Arial', fill: 'white', align: 'left', wordWrap: true, wordWrapWidth: 450 };
     var text = game.add.text(game.world.centerX, game.world.centerY, "-Press to Start-", style);
     text.anchor.set(0.5);
