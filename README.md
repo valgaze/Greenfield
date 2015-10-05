@@ -1,9 +1,20 @@
-# Greenfield
+# Sumo Tomato #
 
 [![Stories in Ready](https://badge.waffle.io/OrgulousArtichoke/Greenfield.svg?label=ready&title=Ready)](http://waffle.io/OrgulousArtichoke/Greenfield)
 
 
 > A multiplayer game using web sockets to allow users to play on one central screen using their mobile devices
+
+
+## Table of Contents
+
+1. [Team](#team)
+2. [Usage](#Usage)
+3. [Requirements](#requirements)
+4. [Development](#development)
+    a. [Installing Dependencies](#installing-dependencies)
+    b. [Tasks](#tasks)
+5. [Contributing](#contributing)
 
 ## Team
 
@@ -11,19 +22,11 @@
   - __Scrum Master__: Andrew Gonzales
   - __Development Team Members__: Victor Algaze, Andrew Gonzales, John Wareing
 
-## Table of Contents
-
-1. [Usage](#Usage)
-1. [Requirements](#requirements)
-1. [Development](#development)
-    1. [Installing Dependencies](#installing-dependencies)
-    1. [Tasks](#tasks)
-1. [Team](#team)
-1. [Contributing](#contributing)
-
 ## Usage
 
-> Should this be for end user (player) or for people who want to download the repo?
+> To play: Open [this page](http://www.hr3232.elasticbeanstalk.com) on a big screen, then open a [controller](http://www.hr3232.elasticbeanstalk.com/controller) on your phone and have all your friends jump in!
+
+> To develop: fork the repository, clone to your machine, and follow the development instructions below.
 
 ## Requirements
 
