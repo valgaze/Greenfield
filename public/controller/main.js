@@ -64,7 +64,11 @@
           onPlayerShot(data);
         });
 
-        socket.on("player killed", onPlayerDeath);
+        socket.on("controller killed", onPlayerDeath);
+
+        socket.on("reset controllers", function(data){
+          game.state.start("Lobby");
+        });
 
       //left
       var topRow = 65; //Common shifting amount
@@ -145,7 +149,7 @@ function addText(game, message, configObj){
 }
 
 function onPlayerDeath (){
-  alert('Here is a handler for on death events.\nMaybe we\'ll want the screen to shake or make a noise or whatever')
+  game.state.start("Dead");
 }
 function onPlayerShot (data) {
   //Callback for player shot events
