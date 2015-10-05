@@ -7,9 +7,9 @@ waitingState.prototype = {
 
   create: function(){
    
-    socket.on("reset controllers", function(data){
+    socket.on("flip controllers", function(data){
       //This is the function called when the server is aware that a player pressed "start"
-      game.state.start("Lobby");
+      game.state.start("Main");
     });
 
 
