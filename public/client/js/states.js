@@ -1,4 +1,4 @@
-var game = new Phaser.Game(800, 600, Phaser.AUTO, 'gameContainer');
+var game = new Phaser.Game(window.innerWidth-20, window.innerHeight-20, Phaser.AUTO, 'gameContainer');
 
 game.state.add("Lobby", preload);
 game.state.add("Main", mainState);

@@ -39,6 +39,7 @@ socket.on("new player", function(data){
 
           game.physics.arcade.enable(projectile);
           projectile.body.velocity.x = 1000 * player.facing;
+          projectile.body.velocity.y = 150;
         }
       }
 
@@ -62,10 +63,14 @@ mainState.prototype = {
     game.load.image('ground', 'assets/sushi_50.png');
     game.load.image('projectile', 'assets/tomato_20.png');
     game.load.image('gameover', 'assets/gameover.png');
+    game.load.image('background', 'assets/mtfuji.jpg');
     game.stage.disableVisibilityChange = true;
 
   },
   create: function () {
+
+    game.add.tileSprite(0,0,game.world.width,game.world.height,'background');
+
     playerSpots = {
       1:{x:60,y:1},
       2:{x:game.world.width-100, y:1},
@@ -109,6 +114,10 @@ mainState.prototype = {
 
       for (var i = 0; i < game.world.width * (1/4); i+=50) {
         this.ground.push(this.platforms.create(i, game.world.height/4 -50, 'ground'));
+      }
+
+      for (var i = 0; i < game.world.height * (1/10); i+=50) {
+        this.ground.push(this.platforms.create(game.world.width/2, i, 'ground'));
       }
 
       for (var i = game.world.width * (3/4); i < game.world.width; i+=50) {
@@ -185,8 +194,13 @@ mainState.prototype = {
 
 
   update: function () {
+
     game.physics.arcade.collide(players);
     //game.physics.arcade.collide(players,projectiles);
+
+    game.physics.arcade.overlap(this.platforms, projectiles, function(platform,projectile) {
+      projectile.kill();
+    }, null, this);
 
     game.physics.arcade.overlap(players, projectiles, function(player,projectile) {
       player.body.velocity.x = projectile.body.velocity.x;
