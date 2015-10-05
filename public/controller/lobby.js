@@ -8,7 +8,7 @@ lobby.prototype = {
   },
 
   create: function(){
-
+    game.stage.backgroundColor = '#000';
     socket.on("confirm player", function(){game.state.start("Waiting")});
     socket.on("reject player", function(){game.state.start("Reject")});
     
