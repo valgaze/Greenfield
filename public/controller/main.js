@@ -13,8 +13,8 @@
     var mainState = {
       preload: function () {
         game.stage.backgroundColor = '#666';
-        game.load.image('player', 'assets/player.png'); 
-        game.load.image('ground', 'assets/ground.png');
+        game.load.image('player', 'assets/player.png');
+     
 
 
 
@@ -153,6 +153,5 @@ function onPlayerDeath (){
 }
 function onPlayerShot (data) {
   //Callback for player shot events
-  textRef.setText("Player_num: " + playerNumber +
-  "\n Strength: " + data.health);
+  console.log(data.health);
 }
