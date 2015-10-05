@@ -4,6 +4,7 @@ lobby.prototype = {
   preload: function(){
     this.game.load.image('title', '../assets/title.png');
     this.game.load.image('start_button', '../assets/startgamebutton.png');
+    socket.off("flip controllers");
 
   },
 
