@@ -73,6 +73,7 @@ mainState.prototype = {
       4:{x:game.world.width-100,y:game.world.height-200}
     };
 
+
     playerColors = {
       1: 'player1',
       2: 'player2',
@@ -80,10 +81,7 @@ mainState.prototype = {
       4: 'player4'
     };
 
-
-    
-
-    socket.emit("game start");
+    socket.emit("game started");
 
     console.log('create function called');
     
