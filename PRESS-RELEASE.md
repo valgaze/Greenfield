@@ -20,4 +20,4 @@
   > Open [this page](http://www.hr3232.elasticbeanstalk.com) on a big screen, then open a [controller](http://www.hr3232.elasticbeanstalk.com/controller) on your phone and have all your friends jump in!
 
 ## Closing and Call to Action ##
-  > If you are interested in the development process, check out our Github...
+  > To learn more or contribute to the development process, check out our [website](http://orgulousartichoke.github.io/Greenfield/) or [Github](https://github.com/OrgulousArtichoke/Greenfield).
