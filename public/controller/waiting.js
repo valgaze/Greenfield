@@ -1,3 +1,9 @@
+/*****************************
+  "Waiting" player view
+*****************************/
+  //This is the view displayed on the player's controller when there is enough room and they are waiting for other players to be ready
+  //Listens for: "flip controllers"
+  //Emits: "player start"
 var waitingState = function(game){};
 
 waitingState.prototype = {
@@ -7,8 +13,8 @@ waitingState.prototype = {
 
   create: function(){
    
+   //This event comes from the server if a sufficient number of players (>1) are ready. The controllers then become "active"
     socket.on("flip controllers", function(data){
-      //This is the function called when the server is aware that a player pressed "start"
       game.state.start("Main");
     });
 
@@ -20,13 +26,13 @@ waitingState.prototype = {
     game.scale.scaleMode = Phaser.ScaleManager.SHOW_ALL;
     game.scale.fullScreenScaleMode = Phaser.ScaleManager.EXACT_FIT;
 
-    buttonleft = game.add.button(game.world.centerX, game.world.centerY-45, 'start_button', this.startGame, this, 0, 1, 0, 1);
-        buttonleft.events.onInputDown.add(function(){left=true;});
-        buttonleft.events.onInputUp.add(function(){left=false;});
-        buttonleft.anchor.set(0.5);
+  //Set up button
+    buttonPlay = game.add.button(game.world.centerX, game.world.centerY-45, 'start_button', this.startGame, this, 0, 1, 0, 1);
+        buttonPlay.anchor.set(0.5);
   },
 
   startGame: function(){
+  //This event gets emitted on tap of the button
     socket.emit('player start', {});
   }
 
