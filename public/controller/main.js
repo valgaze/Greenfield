@@ -1,4 +1,12 @@
+/*****************************
+  Main player controller view
+*****************************/
+  //This is the view displayed on the player's controller when they actually play the game
+  //We actually use another phaser game to be able to use Phaser's touch library
+  //Listens for: "controller killed", "reset controllers"
+  //Emits: "left button", "right button", "up button", "shoot button"
 
+  //Very important: Gives us access to socket
   var socket = io();
 
     //some global vars 
@@ -13,22 +21,16 @@
     var mainState = {
       preload: function () {
         game.stage.backgroundColor = '#666';
-        game.load.image('player', 'assets/player.png');
      
-
-
-
-
-
-
-
         game.load.image('jump_button', 'assets/jump.png');
         game.load.image('fire_button', 'assets/fire.png');
         game.load.image('left_button', 'assets/left.png');
         game.load.image('right_button', 'assets/right.png');
 
-
+    //Even if controller loses focus, still render. (This is more of an issue for desktops)
         game.stage.disableVisibilityChange = true;
+        
+    //Rotate controller message if phone is in portrait mode instead of landscape
         this.scale.scaleMode = Phaser.ScaleManager.SHOW_ALL;
         this.scale.setMinMax(480, 260, 1024, 768);
         this.scale.pageAlignHorizontally = true;
@@ -39,37 +41,28 @@
         this.scale.leaveIncorrectOrientation.add(this.leaveIncorrectOrientation, this);
 
 
-    // // fullscreen setup
+    //fullscreen setup
         game.scale.scaleMode = Phaser.ScaleManager.SHOW_ALL;
         game.scale.fullScreenScaleMode = Phaser.ScaleManager.EXACT_FIT;
 
       },
       create: function () {
 
-        socket.on("confirmPlayer", function(data){
-          if (!playerNumber){
-            playerNumber = data.playerNumber;
-          }
-          addText(game, "Player_num: " + playerNumber +
-          "\n Strength: 5");
-        });
-
-        socket.on("rejectPlayer", function(data){
-          addText(game, data.message);
-
-          console.log(data.message);
-        });
-
-        socket.on("player shot", function(data){
-          onPlayerShot(data);
-        });
-
+      /*****************************
+        Major Event Listeners
+      *****************************/
+        //Sent from server, and callback below turns controller into dead view
         socket.on("controller killed", onPlayerDeath);
 
+        //Sent from server, and callback below turns controller into dead view
         socket.on("reset controllers", function(data){
           game.state.start("Lobby");
         });
 
+
+    /*****************************
+      Set up input buttons
+    *****************************/
       //left
       var topRow = 65; //Common shifting amount
 
@@ -95,12 +88,7 @@
       //Special_A
         buttonA = game.add.button(300, 100, 'fire_button', null, this, 0, 1, 0, 1);
             buttonA.events.onInputDown.add(function(){shoot=true;});
-            buttonA.events.onInputUp.add(function(){shoot=false;});
-
-      // //Start button
-      //   buttonStart = game.add.button(0, 200, 'player', null, this, 0, 1, 0, 1);
-      //       buttonStart.events.onInputDown.add(function(){shoot=true;});
-      //       buttonStart.events.onInputUp.add(function(){shoot=false;});      
+            buttonA.events.onInputUp.add(function(){shoot=false;});   
       },
       update: function () {
 
@@ -130,28 +118,6 @@
 
     };
 
-
-
-
 function gofull() { game.scale.startFullScreen(false);}
-function addText(game, message, configObj){
+function onPlayerDeath() { game.state.start("Dead");}
 
-  if (!configObj){
-    var style = { font: 'bold 15pt Arial', fill: 'white', align: 'left', wordWrap: true, wordWrapWidth: 450};
-  }else{
-    var style = configObj;
-  }
-
-  var text = game.add.text(0, 0, message, style);
-  text.anchor.set(0);
-  textRef = text;
-
-}
-
-function onPlayerDeath (){
-  game.state.start("Dead");
-}
-function onPlayerShot (data) {
-  //Callback for player shot events
-  console.log(data.health);
-}
