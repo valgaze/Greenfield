@@ -1,7 +1,12 @@
-// var game = new Phaser.Game(800, 600, Phaser.AUTO, 'gameContainer');
+/*****************************
+  SETUP
+*****************************/
 
+//reqires socket.io.
 var socket = io();
 
+//Creates arrays for living and dead players, and sets up flags
+//to be used later.
 var alive = [];
 var dead = [];
 var someoneKilled = false;
@@ -9,15 +14,26 @@ var winnerAnnounced = false;
 var projectiles;
 var playerSpots = {};
 
+//Creates new players in game space when "new player" event is received
+//from server. Was placed here, isolated from other listeners, because of
+//unpredictable behavior when it was in create block.
 socket.on("new player", function(data){
 
   console.log("from server", data.id, "player number is ",data.playerNumber);
+
+  //Only runs if player is not already alive.
   if(alive.indexOf(data.id) === -1){
     var playerNumber = data.playerNumber;
     var player = players.create(playerSpots[playerNumber].x, playerSpots[playerNumber].y, playerColors[playerNumber]);
-    player.anchor.setTo(0.5,0.5); //set middle of image as reference point
+    
+    //Sets middle of image as reference point.
+    player.anchor.setTo(0.5,0.5);
 
+    //Sets theId property of player to equal socket ID of corresponding controller.
     player.theId = data.id;
+
+    //Sets up phaser physics for player, as well as other player properties that
+    //affect gameplay.
     game.physics.arcade.enable(player);
     player.body.gravity.y = 1000;
     player.body.bounce.y = 0.5;
@@ -26,17 +42,29 @@ socket.on("new player", function(data){
     player.fireRate = 500;
     player.nextFire = 0;
     player.health = 5;
+
+    //Sets up method that allows player to shoot tomatoes.
     player.fire_now = function(){
       if (game.time.now > player.nextFire){
-        player.nextFire = game.time.now + player.fireRate;
-        var projectile = projectiles.getFirstExists(false); // get the first created fireball that no exists atm
-        if (projectile){
-          projectile.owner = player.theId;
-          projectile.exists = true;  // come to existance !
-          projectile.lifespan=2500;  // remove the fireball after 2500 milliseconds - back to non-existance
 
+        //Limits player's rate of tomato throwing.
+        player.nextFire = game.time.now + player.fireRate;
+
+        //Selects first available projectile which is not active in game space.
+        //This projectile does not yet "exist" by phaser standards
+        var projectile = projectiles.getFirstExists(false);
+        if (projectile){
+
+          //Toggles phaser existence of projectile.
+          projectile.exists = true;
+
+          //Removes the tomato after 2500 milliseconds. projectile.exists is now false.
+          projectile.lifespan=2500;
+
+          //Sets position of tomato near player.
           projectile.reset(player.x + 65 * player.facing, player.y - 40);
 
+          //Gives tomato velocity away from player. Contingent on player.facing.
           game.physics.arcade.enable(projectile);
           projectile.body.velocity.x = 1000 * player.facing;
           projectile.body.velocity.y = 150;
@@ -44,15 +72,26 @@ socket.on("new player", function(data){
       }
 
     };
+
+    //Adds player ID to the array of living players.
     alive.push(player.theId);
   }
 });
+
+/*****************************
+  GAME MAIN STATE
+*****************************/
+  //This is the main gameplay state of the actual game. Properties of mainState.prototype
+  //are phaser functions that help set up the game world.
 
 mainState = function(game){};
 
 mainState.prototype = {
 
-  
+  /*****************************
+    PHASER PRELOAD FUNCTION
+  *****************************/
+  //Sets up pictures and other assets to be used in game.
   preload: function () {
     game.stage.backgroundColor = '#adc165';
     game.load.image('player', 'assets/sumo_90.png');
@@ -67,10 +106,17 @@ mainState.prototype = {
     game.stage.disableVisibilityChange = true;
 
   },
+
+  /*****************************
+    PHASER CREATE FUNCTION
+  *****************************/
+  //Contains all functions that should run when Main state is booted up.
   create: function () {
 
+    //Adds background image.
     game.add.tileSprite(0,0,game.world.width,game.world.height,'background');
 
+    //Builds list of locations on the screen where players can start.
     playerSpots = {
       1:{x:60,y:1},
       2:{x:game.world.width-100, y:1},
@@ -78,7 +124,7 @@ mainState.prototype = {
       4:{x:game.world.width-100,y:game.world.height-200}
     };
 
-
+    //Builds list of a different-colored corresponding to each player.
     playerColors = {
       1: 'player1',
       2: 'player2',
@@ -86,23 +132,25 @@ mainState.prototype = {
       4: 'player4'
     };
 
+    //Emits "game started" event. When server hears this, it will send back a
+    //series of "new player" events to populate game arena. Server will also 
+    //tell all "ready" controllers to go into game mode at this point.
     socket.emit("game started");
 
-    console.log('create function called');
-    
-
-
+    //Initializes phaser's "arcade" physics library.
     game.physics.startSystem(Phaser.Physics.ARCADE);
     
-    
+    //Clears out any players lingering in group from previous round.
     players = null;
-    console.log('no players');
+
+    //Creates players group in game.
     players = game.add.group();
 
+    //Creates platforms group in game and allows them to have body physics.
     this.platforms = game.add.group();
     this.platforms.enableBody = true;
     
-    //Create Ground
+    //Create ground and add it to platforms group.
       this.ground = [];
       for (var i = 0; i < game.world.width; i+=50) {
         this.ground.push(this.platforms.create(i, game.world.height - 50, 'ground'));
@@ -127,80 +175,84 @@ mainState.prototype = {
       for (var j = 0; j < this.ground.length; j++) {
         this.ground[j].body.immovable = true;
       }
-    //Listeners
-  
+
+    /*****************************
+      SOCKET EVENT HANDLERS
+    *****************************/
+    //Most of these functions listen for events from the server and then do something
+    //in the game space.
+
+    //Listens for "remove player" events and eliminates players from the players group.
     socket.on("remove player", function(data){
-
-          for (var i = 0; i < players.children.length; i++){
-              if (players.children[i].theId === data.id){
-                  players.children[i].destroy();
-              }else{
-                console.log(players.children[i], i);
-                console.log("instanceid:", players.children[i].theId);
-                console.log("targetid", data.id);
-              }
-            }
-     });
-    socket.on("left button", function(data){
-
-          // that.player.body.velocity.x = -200;
-          for (var i = 0; i < players.children.length; i++){
-              if (players.children[i].theId === data.id){
-                  players.children[i].body.velocity.x = -200;
-                  players.children[i].facing = -1;
-              }else{
-        
-              }
-            }
-     });
-
-    socket.on("right button", function(data){
-        for (var i = 0; i < players.children.length; i++){
-            if (players.children[i].theId === data.id){
-                players.children[i].body.velocity.x = 200;
-                players.children[i].facing = 1;
-
-            }else{
-              console.log(players.children[i], i);
-              console.log("instanceid:", players.children[i].theId);
-              console.log("targetid", data.id);
-            }
-          }
-     });
-    
-    socket.on("up button", function(data){
-          for (var i = 0; i < players.children.length; i++){
-              if (players.children[i].theId === data.id){
-                  players.children[i].body.velocity.y = -600;
-                  
-              }else{
-              }
-            }
-     });
-
-    socket.on("shoot button", function(data){
       for (var i = 0; i < players.children.length; i++){
         if (players.children[i].theId === data.id){
-            players.children[i].fire_now();
+            players.children[i].destroy();
         }else{
+          console.log(players.children[i], i);
+          console.log("instanceid:", players.children[i].theId);
+          console.log("targetid", data.id);
         }
       }
     });
 
+    //Gives corresponding player leftward velocity on "left button" event.
+    //Right, up, and shoot functions follow similar pattern.
+    socket.on("left button", function(data){
+      for (var i = 0; i < players.children.length; i++){
+        if (players.children[i].theId === data.id){
+          players.children[i].body.velocity.x = -200;
+          players.children[i].facing = -1;
+        }
+      }
+    });
 
-    projectiles = game.add.group();  // add a new group for fireballs
+    socket.on("right button", function(data){
+        for (var i = 0; i < players.children.length; i++){
+          if (players.children[i].theId === data.id){
+            players.children[i].body.velocity.x = 200;
+            players.children[i].facing = 1;
+          }
+        }
+     });
+    
+    socket.on("up button", function(data){
+      for (var i = 0; i < players.children.length; i++){
+        if (players.children[i].theId === data.id){
+          players.children[i].body.velocity.y = -600;
+        }
+      }
+    });
+
+    socket.on("shoot button", function(data){
+      for (var i = 0; i < players.children.length; i++){
+        if (players.children[i].theId === data.id){
+          players.children[i].fire_now();
+        }
+      }
+    });
+
+    //Not a listener. Adds a new group for projectiles (tomatoes) and
+    //creates 500 of them to draw from.
+    projectiles = game.add.group();
     projectiles.createMultiple(500, 'projectile', 0, false);
   },
 
-
+  /*****************************
+    PHASER UPDATE FUNCTION
+  *****************************/
+  //Runs in a loop at high rate of speed (~60 times/sec). Contains all functions that
+  //are checking second-to-second gameplay conditions.
   update: function () {
 
+    //Phaser physics command - dictates that players will collide with one another, not pass through.
     game.physics.arcade.collide(players);
 
+    //Kills any projectile that hits a platform.
     game.physics.arcade.overlap(this.platforms, projectiles, function(platform,projectile) {
       projectile.kill();
     }, null, this);
 
+    //Kills projectile and subtracts health from player when projectile hits player.
     game.physics.arcade.overlap(players, projectiles, function(player,projectile) {
       player.body.velocity.x = projectile.body.velocity.x;
       projectile.kill();
@@ -209,12 +261,9 @@ mainState.prototype = {
       socket.emit("player shot", {id: player.theId, health: player.health});
     }, null, this);
 
-
-
-    //Check for collisions between any players and the ground.
-    
+    //Declares that players will collide with ground.
+    //Reduces speed of players over time (friction).
     for (var i = 0; i < this.ground.length; i++) {
-      //game.physics.arcade.collide(this.player, this.ground[i]);
       for (var j = 0; j < players.children.length; j++){
         game.physics.arcade.collide(players.children[j], this.ground[i]);
         if (players.children[j].body.velocity.x>0){
@@ -226,6 +275,7 @@ mainState.prototype = {
       }
     }
 
+    //Kills players who run out of health.
     for (var i = 0; i< players.children.length; i++){
       if (players.children[i].health <= 0){
         if (dead.indexOf(players.children[i].theId)===-1){
@@ -239,57 +289,37 @@ mainState.prototype = {
       }
     }
 
+    //If someoneKilled flag is true, emits "player killed" event to server.
+    //Event payload is that player's ID (same as socket ID of corresponding controller).
     if (someoneKilled){
       console.log("Player " + dead[dead.length-1] + " has died.");
       someoneKilled = false;
       socket.emit("player killed", {id: dead[dead.length-1]});
     }
 
+    //Sets winnerAnnounced flag to true if all but one players are dead.
     if (alive.length === 1 && dead.length !== 0 && !winnerAnnounced){
       console.log('Player ' + alive[0] + ' won the game.');
       winnerAnnounced = true;
     }
 
-    
+    //If winnerAnnounced flag is true, emits "game over" event to server.
+    //Also clears out relevant game data.
+    //Also sends game into "GameOver" state, leaving the "Main" state.
     if (winnerAnnounced) {
-      // var winner = alive[0];
-      //change game state
       socket.emit("game over", {id: alive[0]});
       game.state.start("GameOver", true, false);
-      //clear out old game data
       alive = [];
       dead = [];
       players.destroy(true);
       someoneKilled = false;
       winnerAnnounced = false;
     }
-
-
-    
-
-/*******************
-Code below handles non-socket inputs. Consider changing input format
-so that controllers only emit on button up/down events, and toggle the 
-status of buttons here in phaser. Then button press consequences would 
-be run in the phaser update loop rather than on socket emit events.
-********************/
-
-
-    var cursors = game.input.keyboard.createCursorKeys();
-    if (cursors.left.isDown)
-    { 
-      players.scale = (2,2);
-      // shotsFired = true;
-    }
-
-    
   },
 
-  //TODO: call this on end of game
   endGame: function () {
     game.state.start("GameOver");
   }
-  
 };
 
 
