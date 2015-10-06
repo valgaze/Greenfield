@@ -1,3 +1,10 @@
+/*****************************
+  "Reject" player view
+*****************************/
+  //This is the view displayed on the player's controller when the game is "full"
+  //We actually use another phaser game to be able to use Phaser's touch library
+  //Listens for: "reset controllers"
+  //Emits: Nothing
 
 var rejectState = function(game){};
 
@@ -6,9 +13,8 @@ rejectState.prototype = {
   },
 
   create: function(){
-   
+   //
     socket.on("reset controllers", function(data){
-      //This is the function called when the server is aware that a player pressed "start"
       game.state.start("Lobby");
     });
 
