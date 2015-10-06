@@ -13,7 +13,7 @@ rejectState.prototype = {
   },
 
   create: function(){
-   //
+   //This event comes from the server and when received will put player back to lobby
     socket.on("reset controllers", function(data){
       game.state.start("Lobby");
     });
